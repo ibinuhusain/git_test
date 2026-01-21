@@ -110,12 +110,16 @@ $remaining_assignments = $total_assignments - $completed_count;
                 </div>
             </div>
             
-            <h2>Your Assigned Stores (<?php echo date('M j, Y'); ?>)</h2>
+            <h2>Your Assigned Entities (<?php echo date('M j, Y'); ?>)</h2>
             <?php if (count($assignments) > 0): ?>
                 <table>
                     <thead>
                         <tr>
                             <th>Store Name</th>
+                            <th>Region</th>
+                            <th>Mall</th>
+                            <th>Entity</th>
+                            <th>Brand</th>
                             <th>Address</th>
                             <th>Target Amount</th>
                             <th>Collected</th>
@@ -133,9 +137,18 @@ $remaining_assignments = $total_assignments - $completed_count;
                             
                             $collected_amount = $collection ? $collection['amount_collected'] : 0;
                             $status = $assignment['status'];
+                            
+                            // Get store details including new fields
+                            $store_stmt = $pdo->prepare("SELECT * FROM stores WHERE id = ?");
+                            $store_stmt->execute([$assignment['store_id']]);
+                            $store = $store_stmt->fetch(PDO::FETCH_ASSOC);
                             ?>
                             <tr>
                                 <td><?php echo htmlspecialchars($assignment['store_name']); ?></td>
+                                <td><?php echo htmlspecialchars($store['region_name'] ?? 'N/A'); ?></td>
+                                <td><?php echo htmlspecialchars($store['mall'] ?? 'N/A'); ?></td>
+                                <td><?php echo htmlspecialchars($store['entity'] ?? 'N/A'); ?></td>
+                                <td><?php echo htmlspecialchars($store['brand'] ?? 'N/A'); ?></td>
                                 <td><?php echo htmlspecialchars($assignment['store_address']); ?></td>
                                 <td><?php echo number_format($assignment['target_amount'], 2); ?></td>
                                 <td><?php echo number_format($collected_amount, 2); ?></td>

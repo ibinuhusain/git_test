@@ -70,6 +70,10 @@ foreach ($pending_results as $result) {
                 <thead>
                     <tr>
                         <th>Agent Name</th>
+                        <th>Region</th>
+                        <th>Mall</th>
+                        <th>Entity</th>
+                        <th>Brand</th>
                         <th>Username</th>
                         <th>Phone</th>
                         <th>Total Assignments</th>
@@ -83,6 +87,10 @@ foreach ($pending_results as $result) {
                     <?php foreach ($agents as $agent): ?>
                         <tr>
                             <td><?php echo htmlspecialchars($agent['name']); ?></td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
                             <td><?php echo htmlspecialchars($agent['username']); ?></td>
                             <td><?php echo htmlspecialchars($agent['phone']); ?></td>
                             <td><?php echo $agent['total_assignments']; ?></td>
@@ -117,6 +125,10 @@ foreach ($pending_results as $result) {
                 <thead>
                     <tr>
                         <th>Agent Name</th>
+                        <th>Region</th>
+                        <th>Mall</th>
+                        <th>Entity</th>
+                        <th>Brand</th>
                         <th>Current Assignments</th>
                         <th>Progress</th>
                         <th>Last Updated</th>
@@ -133,6 +145,10 @@ foreach ($pending_results as $result) {
                     ?>
                         <tr>
                             <td><?php echo htmlspecialchars($agent['name']); ?></td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
                             <td><?php echo ($agent['total_assignments'] - $agent['completed_assignments']); ?> remaining</td>
                             <td>
                                 <?php 
@@ -153,7 +169,7 @@ foreach ($pending_results as $result) {
                     else:
                     ?>
                         <tr>
-                            <td colspan="4">No agents currently in transit.</td>
+                            <td colspan="8">No agents currently in transit.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>

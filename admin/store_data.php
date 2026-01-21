@@ -25,6 +25,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     } elseif (isset($_POST['add_store'])) {
         $store_name = trim($_POST['store_name']);
+        $mall = trim($_POST['mall']);
+        $entity = trim($_POST['entity']);
+        $brand = trim($_POST['brand']);
         $store_address = trim($_POST['store_address']);
         $region_id = $_POST['region_id'];
         
@@ -32,8 +35,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Store name and region are required.';
         } else {
             try {
-                $stmt = $pdo->prepare("INSERT INTO stores (name, address, region_id) VALUES (?, ?, ?)");
-                $stmt->execute([$store_name, $store_address, $region_id]);
+                $stmt = $pdo->prepare("INSERT INTO stores (name, mall, entity, brand, address, region_id) VALUES (?, ?, ?, ?, ?, ?)");
+                $stmt->execute([$store_name, $mall, $entity, $brand, $store_address, $region_id]);
                 $message = 'Store added successfully!';
             } catch (PDOException $e) {
                 $error = 'Error adding store: ' . $e->getMessage();
@@ -139,6 +142,21 @@ $pending_submissions = $pending_submissions_stmt->fetchAll(PDO::FETCH_ASSOC);
                 </div>
                 
                 <div class="form-group">
+                    <label for="mall">Mall:</label>
+                    <input type="text" id="mall" name="mall">
+                </div>
+                
+                <div class="form-group">
+                    <label for="entity">Entity:</label>
+                    <input type="text" id="entity" name="entity">
+                </div>
+                
+                <div class="form-group">
+                    <label for="brand">Brand:</label>
+                    <input type="text" id="brand" name="brand">
+                </div>
+                
+                <div class="form-group">
                     <label for="store_address">Store Address:</label>
                     <textarea id="store_address" name="store_address"></textarea>
                 </div>
@@ -182,6 +200,9 @@ $pending_submissions = $pending_submissions_stmt->fetchAll(PDO::FETCH_ASSOC);
                     <tr>
                         <th>ID</th>
                         <th>Store Name</th>
+                        <th>Mall</th>
+                        <th>Entity</th>
+                        <th>Brand</th>
                         <th>Address</th>
                         <th>Region</th>
                         <th>Action</th>
@@ -192,6 +213,9 @@ $pending_submissions = $pending_submissions_stmt->fetchAll(PDO::FETCH_ASSOC);
                         <tr>
                             <td><?php echo $store['id']; ?></td>
                             <td><?php echo htmlspecialchars($store['name']); ?></td>
+                            <td><?php echo htmlspecialchars($store['mall'] ?? 'N/A'); ?></td>
+                            <td><?php echo htmlspecialchars($store['entity'] ?? 'N/A'); ?></td>
+                            <td><?php echo htmlspecialchars($store['brand'] ?? 'N/A'); ?></td>
                             <td><?php echo htmlspecialchars($store['address']); ?></td>
                             <td><?php echo htmlspecialchars($store['region_name'] ?? 'N/A'); ?></td>
                             <td>

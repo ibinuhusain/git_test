@@ -46,6 +46,9 @@ function initializeDatabase() {
         name VARCHAR(100) NOT NULL,
         address TEXT,
         region_id INT,
+        mall VARCHAR(100),
+        entity VARCHAR(100),
+        brand VARCHAR(100),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (region_id) REFERENCES regions(id)
     )";
@@ -102,6 +105,15 @@ function initializeDatabase() {
         $hashed_password = password_hash('admin123', PASSWORD_DEFAULT);
         $stmt = $pdo->prepare("INSERT INTO users (username, password, name, phone, role) VALUES (?, ?, ?, ?, ?)");
         $stmt->execute(['admin', $hashed_password, 'Administrator', '0000000000', 'admin']);
+    }
+    
+    // Insert default agent user if none exists
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE role = 'agent'");
+    $stmt->execute();
+    if ($stmt->fetchColumn() == 0) {
+        $hashed_password = password_hash('agent123', PASSWORD_DEFAULT);
+        $stmt = $pdo->prepare("INSERT INTO users (username, password, name, phone, role) VALUES (?, ?, ?, ?, ?)");
+        $stmt->execute(['agent1', $hashed_password, 'John Doe', '1234567890', 'agent']);
     }
 }
 ?>

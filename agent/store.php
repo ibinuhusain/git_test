@@ -166,6 +166,15 @@ $receipt_images = $collection ? json_decode($collection['receipt_images'], true)
             <h2>Store Information</h2>
             <div class="card">
                 <p><strong>Store Name:</strong> <?php echo htmlspecialchars($assignment['store_name']); ?></p>
+                <p><strong>Region:</strong> <?php 
+                    $store_details = $pdo->prepare("SELECT * FROM stores WHERE id = ?");
+                    $store_details->execute([$assignment['store_id']]);
+                    $store_info = $store_details->fetch(PDO::FETCH_ASSOC);
+                    echo htmlspecialchars($store_info['region_name'] ?? 'N/A'); 
+                ?></p>
+                <p><strong>Mall:</strong> <?php echo htmlspecialchars($store_info['mall'] ?? 'N/A'); ?></p>
+                <p><strong>Entity:</strong> <?php echo htmlspecialchars($store_info['entity'] ?? 'N/A'); ?></p>
+                <p><strong>Brand:</strong> <?php echo htmlspecialchars($store_info['brand'] ?? 'N/A'); ?></p>
                 <p><strong>Address:</strong> <?php echo htmlspecialchars($assignment['store_address']); ?></p>
                 <p><strong>Assigned Agent:</strong> <?php echo htmlspecialchars($assignment['agent_name']); ?></p>
                 <p><strong>Target Amount:</strong> <?php echo number_format($assignment['target_amount'], 2); ?></p>

@@ -35,7 +35,7 @@ $agents_stmt = $pdo->query("SELECT id, name, username FROM users WHERE role = 'a
 $agents = $agents_stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Get all stores
-$stores_stmt = $pdo->query("SELECT s.id, s.name, r.name as region_name FROM stores s LEFT JOIN regions r ON s.region_id = r.id");
+$stores_stmt = $pdo->query("SELECT s.id, s.name, s.mall, s.entity, s.brand, r.name as region_name FROM stores s LEFT JOIN regions r ON s.region_id = r.id");
 $stores = $stores_stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Get today's assignments
@@ -85,7 +85,7 @@ $today_assignments = $assignments_stmt->fetchAll(PDO::FETCH_ASSOC);
                 <div class="alert alert-danger"><?php echo htmlspecialchars($error_message); ?></div>
             <?php endif; ?>
             
-            <h2>Assign Shops to Agents</h2>
+            <h2>Assign Agents to Entities</h2>
             <form method="post" action="">
                 <input type="hidden" name="assign_shops" value="1">
                 
@@ -95,33 +95,47 @@ $today_assignments = $assignments_stmt->fetchAll(PDO::FETCH_ASSOC);
                 </div>
                 
                 <div class="form-group">
-                    <label for="agent_id">Select Agent:</label>
+                    <label for="agent_id">Agent Name:</label>
                     <select id="agent_id" name="agent_id" required>
                         <option value="">Choose an agent</option>
                         <?php foreach ($agents as $agent): ?>
-                            <option value="<?php echo $agent['id']; ?>"><?php echo htmlspecialchars($agent['name']); ?> (<?php echo htmlspecialchars($agent['username']); ?>)</option>
+                            <option value="<?php echo $agent['id']; ?>"><?php echo htmlspecialchars($agent['name']); ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
                 
                 <div class="form-group">
-                    <label for="target_amount">Target Amount per Shop:</label>
+                    <label for="target_amount">Target Amount per Assignment:</label>
                     <input type="number" id="target_amount" name="target_amount" step="0.01" min="0" required>
                 </div>
                 
                 <div class="form-group">
-                    <label>Select Stores to Assign:</label>
-                    <?php foreach ($stores as $store): ?>
-                        <div>
-                            <input type="checkbox" id="store_<?php echo $store['id']; ?>" name="stores[]" value="<?php echo $store['id']; ?>">
-                            <label for="store_<?php echo $store['id']; ?>">
-                                <?php echo htmlspecialchars($store['name']); ?> (Region: <?php echo htmlspecialchars($store['region_name'] ?? 'N/A'); ?>)
-                            </label>
-                        </div>
-                    <?php endforeach; ?>
+                    <label>Select Assignment Details:</label>
+                    <table class="assignment-table">
+                        <thead>
+                            <tr>
+                                <th>Select</th>
+                                <th>Region</th>
+                                <th>Mall</th>
+                                <th>Entity</th>
+                                <th>Brand</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($stores as $store): ?>
+                                <tr>
+                                    <td><input type="checkbox" id="store_<?php echo $store['id']; ?>" name="stores[]" value="<?php echo $store['id']; ?>"></td>
+                                    <td><?php echo htmlspecialchars($store['region_name'] ?? 'N/A'); ?></td>
+                                    <td><?php echo htmlspecialchars($store['mall'] ?? 'N/A'); ?></td>
+                                    <td><?php echo htmlspecialchars($store['entity'] ?? 'N/A'); ?></td>
+                                    <td><?php echo htmlspecialchars($store['brand'] ?? 'N/A'); ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
                 </div>
                 
-                <button type="submit" class="btn">Assign Shops</button>
+                <button type="submit" class="btn">Assign Entities</button>
             </form>
             
             <hr style="margin: 30px 0;">
