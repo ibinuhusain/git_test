@@ -1,7 +1,9 @@
 <?php
 session_start();
 
-require_once '../config.php';
+// Determine the base directory (two levels up from includes)
+$baseDir = dirname(__DIR__);
+require_once $baseDir . '/config.php';
 
 // Check if user is logged in
 function isLoggedIn() {
