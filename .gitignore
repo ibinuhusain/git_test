@@ -1,0 +1,78 @@
+```
+# Dependencies
+vendor/
+
+# Logs and temp files
+*.log
+*.tmp
+
+# Environment
+.env
+.env.local
+*.env.*
+
+# Editor/IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Cache directories
+.cache/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Build artifacts
+build/
+dist/
+*.o
+*.obj
+*.so
+*.dll
+*.exe
+
+# Coverage reports
+coverage/
+htmlcov/
+.coverage
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Backup files
+*~
+*.bak
+*.backup
+
+# Compression files
+*.zip
+*.gz
+*.tar
+*.tgz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.zst
+*.lz4
+*.lzh
+*.cab
+*.arj
+*.rpm
+*.deb
+*.Z
+*.lz
+*.lzo
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst
+```
