@@ -60,7 +60,6 @@ function initializeDatabase() {
         agent_id INT,
         store_id INT,
         date_assigned DATE,
-        target_amount DECIMAL(10,2),
         status ENUM('pending', 'completed', 'submitted') DEFAULT 'pending',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (agent_id) REFERENCES users(id),

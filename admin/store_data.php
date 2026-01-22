@@ -28,21 +28,81 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $mall = trim($_POST['mall']);
         $entity = trim($_POST['entity']);
         $brand = trim($_POST['brand']);
-        $store_address = trim($_POST['store_address']);
+        $store_id = trim($_POST['store_id']);
         $region_id = $_POST['region_id'];
         
         if (empty($store_name) || empty($region_id)) {
             $error = 'Store name and region are required.';
         } else {
             try {
-                $stmt = $pdo->prepare("INSERT INTO stores (name, mall, entity, brand, address, region_id) VALUES (?, ?, ?, ?, ?, ?)");
-                $stmt->execute([$store_name, $mall, $entity, $brand, $store_address, $region_id]);
+                $stmt = $pdo->prepare("INSERT INTO stores (name, mall, entity, brand, region_id) VALUES (?, ?, ?, ?, ?)");
+                $stmt->execute([$store_name, $mall, $entity, $brand, $region_id]);
                 $message = 'Store added successfully!';
             } catch (PDOException $e) {
                 $error = 'Error adding store: ' . $e->getMessage();
             }
         }
     } elseif (isset($_POST['import_stores'])) {
+        if (isset($_FILES['excel_file']) && $_FILES['excel_file']['error'] === UPLOAD_ERR_OK) {
+            $file_tmp = $_FILES['excel_file']['tmp_name'];
+            $file_type = $_FILES['excel_file']['type'];
+            
+            // Check if it's a valid Excel file
+            $valid_types = ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'text/csv'];
+            if (in_array($file_type, $valid_types)) {
+                // Process Excel file - for now we'll use a simple CSV approach
+                if (($handle = fopen($file_tmp, "r")) !== FALSE) {
+                    // Skip header row
+                    fgetcsv($handle);
+                    
+                    $added_count = 0;
+                    while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+                        if (count($data) >= 4) {
+                            $store_name = trim($data[0]);
+                            $store_id = trim($data[1]);
+                            $brand = trim($data[2]);
+                            $mall = trim($data[3]);
+                            $entity = trim($data[4]);
+                            
+                            if (!empty($store_name)) {
+                                // Check if store already exists
+                                $check_stmt = $pdo->prepare("SELECT id FROM stores WHERE name = ?");
+                                $check_stmt->execute([$store_name]);
+                                
+                                if (!$check_stmt->fetch()) {
+                                    // Find or create region based on mall
+                                    $region_stmt = $pdo->prepare("SELECT id FROM regions WHERE name = ?");
+                                    $region_stmt->execute([$mall]);
+                                    $region = $region_stmt->fetch();
+                                    
+                                    if (!$region) {
+                                        // Create region if it doesn't exist
+                                        $region_insert = $pdo->prepare("INSERT INTO regions (name) VALUES (?)");
+                                        $region_insert->execute([$mall]);
+                                        $region_id = $pdo->lastInsertId();
+                                    } else {
+                                        $region_id = $region['id'];
+                                    }
+                                    
+                                    $stmt = $pdo->prepare("INSERT INTO stores (name, mall, entity, brand, region_id) VALUES (?, ?, ?, ?, ?)");
+                                    $stmt->execute([$store_name, $mall, $entity, $brand, $region_id]);
+                                    $added_count++;
+                                }
+                            }
+                        }
+                    }
+                    fclose($handle);
+                    
+                    if ($added_count > 0) {
+                        $message = "Successfully imported $added_count stores!";
+                    } else {
+                        $error = "No stores were imported. Check your file format.";
+                    }
+                } else {
+                    $error = "Could not read the uploaded file.";
+                }
+            } else {
+                $error = "Invalid file type. Please upload a CSV or Excel file.";
         if (isset($_FILES['excel_file_stores']) && $_FILES['excel_file_stores']['error'] === UPLOAD_ERR_OK) {
             $fileTmpPath = $_FILES['excel_file_stores']['tmp_name'];
             $fileName = $_FILES['excel_file_stores']['name'];
@@ -100,9 +160,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     } elseif (isset($_POST['delete_store'])) {
         $store_id = $_POST['store_id'];
-        $stmt = $pdo->prepare("DELETE FROM stores WHERE id = ?");
-        $stmt->execute([$store_id]);
-        $message = 'Store deleted successfully!';
+        
+        try {
+            // Start transaction to ensure data consistency
+            $pdo->beginTransaction();
+            
+            // Get all daily assignment IDs associated with this store
+            $stmt = $pdo->prepare("SELECT id FROM daily_assignments WHERE store_id = ?");
+            $stmt->execute([$store_id]);
+            $assignment_ids = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            
+            // If there are assignments, delete related records in collections first
+            if (!empty($assignment_ids)) {
+                $placeholders = str_repeat('?,', count($assignment_ids) - 1) . '?';
+                $stmt = $pdo->prepare("DELETE FROM collections WHERE assignment_id IN ($placeholders)");
+                $stmt->execute($assignment_ids);
+            }
+            
+            // Then delete the daily assignments
+            $stmt = $pdo->prepare("DELETE FROM daily_assignments WHERE store_id = ?");
+            $stmt->execute([$store_id]);
+            
+            // Finally, delete the store
+            $stmt = $pdo->prepare("DELETE FROM stores WHERE id = ?");
+            $stmt->execute([$store_id]);
+            
+            $pdo->commit();
+            $message = 'Store deleted successfully!';
+        } catch (PDOException $e) {
+            $pdo->rollback();
+            $error = 'Error deleting store: ' . $e->getMessage();
+        }
     } elseif (isset($_POST['update_approval'])) {
         $submission_id = $_POST['submission_id'];
         $status = $_POST['status'];
@@ -174,6 +262,21 @@ $pending_submissions = $pending_submissions_stmt->fetchAll(PDO::FETCH_ASSOC);
                 <div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div>
             <?php endif; ?>
             
+            <h2>Import Stores via Excel</h2>
+            <form method="post" action="" enctype="multipart/form-data">
+                <input type="hidden" name="import_stores" value="1">
+                
+                <div class="form-group">
+                    <label for="excel_file">Upload Excel File:</label>
+                    <input type="file" id="excel_file" name="excel_file" accept=".xlsx,.xls,.csv" required>
+                    <small>Excel file should have columns: Storename, Store ID, Brand, Mall, Entity</small>
+                </div>
+                
+                <button type="submit" class="btn">Import from Excel</button>
+            </form>
+            
+            <hr style="margin: 30px 0;">
+            
             <h2>Add New Region</h2>
             <form method="post" action="">
                 <input type="hidden" name="add_region" value="1">
@@ -213,8 +316,8 @@ $pending_submissions = $pending_submissions_stmt->fetchAll(PDO::FETCH_ASSOC);
                 </div>
                 
                 <div class="form-group">
-                    <label for="store_address">Store Address:</label>
-                    <textarea id="store_address" name="store_address"></textarea>
+                    <label for="store_id">Store ID:</label>
+                    <input type="text" id="store_id" name="store_id">
                 </div>
                 
                 <div class="form-group">
@@ -274,7 +377,6 @@ $pending_submissions = $pending_submissions_stmt->fetchAll(PDO::FETCH_ASSOC);
                         <th>Mall</th>
                         <th>Entity</th>
                         <th>Brand</th>
-                        <th>Address</th>
                         <th>Region</th>
                         <th>Action</th>
                     </tr>
@@ -287,7 +389,6 @@ $pending_submissions = $pending_submissions_stmt->fetchAll(PDO::FETCH_ASSOC);
                             <td><?php echo htmlspecialchars($store['mall'] ?? 'N/A'); ?></td>
                             <td><?php echo htmlspecialchars($store['entity'] ?? 'N/A'); ?></td>
                             <td><?php echo htmlspecialchars($store['brand'] ?? 'N/A'); ?></td>
-                            <td><?php echo htmlspecialchars($store['address']); ?></td>
                             <td><?php echo htmlspecialchars($store['region_name'] ?? 'N/A'); ?></td>
                             <td>
                                 <form method="post" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this store?');">

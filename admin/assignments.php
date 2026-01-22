@@ -8,12 +8,11 @@ $pdo = getConnection();
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['assign_shops'])) {
     $agent_id = $_POST['agent_id'];
     $selected_stores = $_POST['stores'];
-    $target_amount = $_POST['target_amount'];
     $assignment_date = $_POST['assignment_date'] ?? date('Y-m-d');
     
     foreach ($selected_stores as $store_id) {
-        $stmt = $pdo->prepare("INSERT INTO daily_assignments (agent_id, store_id, date_assigned, target_amount) VALUES (?, ?, ?, ?)");
-        $stmt->execute([$agent_id, $store_id, $assignment_date, $target_amount]);
+        $stmt = $pdo->prepare("INSERT INTO daily_assignments (agent_id, store_id, date_assigned) VALUES (?, ?, ?)");
+        $stmt->execute([$agent_id, $store_id, $assignment_date]);
     }
     
     $success_message = "Shops assigned successfully!";
@@ -22,6 +21,62 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['assign_shops'])) {
 // Handle Excel import
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['import_excel'])) {
     if (isset($_FILES['excel_file']) && $_FILES['excel_file']['error'] === UPLOAD_ERR_OK) {
+        $file_tmp = $_FILES['excel_file']['tmp_name'];
+        $file_type = $_FILES['excel_file']['type'];
+        
+        // Check if it's a valid Excel file
+        $valid_types = ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'text/csv'];
+        if (in_array($file_type, $valid_types)) {
+            // Process Excel file - for now we'll use a simple CSV approach
+            if (($handle = fopen($file_tmp, "r")) !== FALSE) {
+                // Skip header row
+                fgetcsv($handle);
+                
+                $added_count = 0;
+                while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+                    if (count($data) >= 5) {
+                        $agent_name = trim($data[0]);
+                        $region = trim($data[1]);
+                        $mall = trim($data[2]);
+                        $entity = trim($data[3]);
+                        $brand = trim($data[4]);
+                        
+                        // Find agent by name
+                        $agent_stmt = $pdo->prepare("SELECT id FROM users WHERE name = ? AND role = 'agent'");
+                        $agent_stmt->execute([$agent_name]);
+                        $agent = $agent_stmt->fetch();
+                        
+                        if ($agent) {
+                            $agent_id = $agent['id'];
+                            
+                            // Find store by entity/mall details
+                            $store_stmt = $pdo->prepare("SELECT id FROM stores WHERE entity = ? AND mall = ?");
+                            $store_stmt->execute([$entity, $mall]);
+                            $store = $store_stmt->fetch();
+                            
+                            if ($store) {
+                                $store_id = $store['id'];
+                                
+                                // Create assignment
+                                $assignment_stmt = $pdo->prepare("INSERT INTO daily_assignments (agent_id, store_id, date_assigned) VALUES (?, ?, ?)");
+                                $assignment_stmt->execute([$agent_id, $store_id, date('Y-m-d')]);
+                                $added_count++;
+                            }
+                        }
+                    }
+                }
+                fclose($handle);
+                
+                if ($added_count > 0) {
+                    $success_message = "Successfully imported $added_count assignments!";
+                } else {
+                    $error_message = "No assignments were imported. Check your file format.";
+                }
+            } else {
+                $error_message = "Could not read the uploaded file.";
+            }
+        } else {
+            $error_message = "Invalid file type. Please upload a CSV or Excel file.";
         $fileTmpPath = $_FILES['excel_file']['tmp_name'];
         $fileName = $_FILES['excel_file']['name'];
         $fileSize = $_FILES['excel_file']['size'];
@@ -222,6 +277,7 @@ $today_assignments = $assignments_stmt->fetchAll(PDO::FETCH_ASSOC);
                 
                 <div class="form-group">
                     <label for="excel_file">Upload Excel File:</label>
+                    <input type="file" id="excel_file" name="excel_file" accept=".xlsx,.xls,.csv" required>
                     <input type="file" id="excel_file" name="excel_file" accept=".xlsx,.xls" required>
                     <small>Excel file should have columns: Agent_Name, Region, Mall, Entity, Brand</small>
                 </div>
