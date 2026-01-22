@@ -44,9 +44,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     } elseif (isset($_POST['delete_store'])) {
         $store_id = $_POST['store_id'];
-        $stmt = $pdo->prepare("DELETE FROM stores WHERE id = ?");
-        $stmt->execute([$store_id]);
-        $message = 'Store deleted successfully!';
+        
+        try {
+            // Start transaction to ensure data consistency
+            $pdo->beginTransaction();
+            
+            // Get all daily assignment IDs associated with this store
+            $stmt = $pdo->prepare("SELECT id FROM daily_assignments WHERE store_id = ?");
+            $stmt->execute([$store_id]);
+            $assignment_ids = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            
+            // If there are assignments, delete related records in collections first
+            if (!empty($assignment_ids)) {
+                $placeholders = str_repeat('?,', count($assignment_ids) - 1) . '?';
+                $stmt = $pdo->prepare("DELETE FROM collections WHERE assignment_id IN ($placeholders)");
+                $stmt->execute($assignment_ids);
+            }
+            
+            // Then delete the daily assignments
+            $stmt = $pdo->prepare("DELETE FROM daily_assignments WHERE store_id = ?");
+            $stmt->execute([$store_id]);
+            
+            // Finally, delete the store
+            $stmt = $pdo->prepare("DELETE FROM stores WHERE id = ?");
+            $stmt->execute([$store_id]);
+            
+            $pdo->commit();
+            $message = 'Store deleted successfully!';
+        } catch (PDOException $e) {
+            $pdo->rollback();
+            $error = 'Error deleting store: ' . $e->getMessage();
+        }
     } elseif (isset($_POST['update_approval'])) {
         $submission_id = $_POST['submission_id'];
         $status = $_POST['status'];
