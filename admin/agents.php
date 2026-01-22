@@ -4,40 +4,9 @@ requireAdmin();
 
 $pdo = getConnection();
 
-// Get all agents with their collection stats
-$agents_stmt = $pdo->prepare("
-    SELECT u.*, 
-           COUNT(da.id) as total_assignments,
-           COUNT(CASE WHEN da.status = 'completed' THEN 1 END) as completed_assignments,
-           COALESCE(SUM(CASE WHEN da.status = 'completed' THEN c.amount_collected END), 0) as total_collected
-    FROM users u
-    LEFT JOIN daily_assignments da ON u.id = da.agent_id AND DATE(da.date_assigned) = ?
-    LEFT JOIN collections c ON da.id = c.assignment_id
-    WHERE u.role = 'agent'
-    GROUP BY u.id
-    ORDER BY u.name
-");
-$today = date('Y-m-d');
-$agents_stmt->execute([$today]);
+// Get all agents
+$agents_stmt = $pdo->query("SELECT * FROM users WHERE role = 'agent' ORDER BY name");
 $agents = $agents_stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// Get pending collections for each agent
-$pending_stmt = $pdo->prepare("
-    SELECT u.id as agent_id, COUNT(c.id) as pending_count
-    FROM users u
-    LEFT JOIN daily_assignments da ON u.id = da.agent_id AND DATE(da.date_assigned) = ?
-    LEFT JOIN collections c ON da.id = c.assignment_id AND c.pending_amount > 0
-    WHERE u.role = 'agent'
-    GROUP BY u.id
-");
-$pending_stmt->execute([$today]);
-$pending_results = $pending_stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// Create a map of agent ID to pending count
-$pending_map = [];
-foreach ($pending_results as $result) {
-    $pending_map[$result['agent_id']] = $result['pending_count'];
-}
 ?>
 
 <!DOCTYPE html>
@@ -66,6 +35,7 @@ foreach ($pending_results as $result) {
         <div class="content">
             <h2>All Agents</h2>
             
+            <div class="table-responsive">
             <table>
                 <thead>
                     <tr>
@@ -86,6 +56,7 @@ foreach ($pending_results as $result) {
                     <?php endforeach; ?>
                 </tbody>
             </table>
+            </div>
         </div>
     </div>
 </body>

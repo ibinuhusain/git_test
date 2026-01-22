@@ -135,12 +135,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             
             <button type="submit">Login</button>
         </form>
-        
-        <div class="default-credentials">
-            <strong>Default Admin Credentials:</strong><br>
-            Username: admin<br>
-            Password: admin123
-        </div>
     </div>
 </body>
 </html>

@@ -7,7 +7,69 @@ $pdo = getConnection();
 // Get today's date for statistics
 $today = date('Y-m-d');
 
-// Total collections today
+// Total agents
+$stmt = $pdo->prepare("SELECT COUNT(*) as total_agents FROM users WHERE role = 'agent'");
+$stmt->execute();
+$total_agents = $stmt->fetchColumn() ?: 0;
+
+// Agents assigned today
+$stmt = $pdo->prepare("
+    SELECT COUNT(DISTINCT da.agent_id) as agents_assigned 
+    FROM daily_assignments da 
+    WHERE DATE(da.date_assigned) = ?
+");
+$stmt->execute([$today]);
+$agents_assigned = $stmt->fetchColumn() ?: 0;
+
+// Total stores/assigned entities
+$stmt = $pdo->prepare("
+    SELECT COUNT(*) as total_stores 
+    FROM daily_assignments da 
+    WHERE DATE(da.date_assigned) = ?
+");
+$stmt->execute([$today]);
+$total_stores = $stmt->fetchColumn() ?: 0;
+
+// Completed stores/entities
+$stmt = $pdo->prepare("
+    SELECT COUNT(*) as completed_stores 
+    FROM daily_assignments da 
+    WHERE DATE(da.date_assigned) = ? AND da.status = 'completed'
+");
+$stmt->execute([$today]);
+$completed_stores = $stmt->fetchColumn() ?: 0;
+
+// Total malls (from assigned stores)
+$stmt = $pdo->prepare("
+    SELECT COUNT(DISTINCT s.mall) as total_malls 
+    FROM daily_assignments da 
+    JOIN stores s ON da.store_id = s.id
+    WHERE DATE(da.date_assigned) = ?
+");
+$stmt->execute([$today]);
+$total_malls = $stmt->fetchColumn() ?: 0;
+
+// Completed malls (malls with all stores completed)
+$stmt = $pdo->prepare("
+    SELECT COUNT(DISTINCT s.mall) as completed_malls 
+    FROM daily_assignments da 
+    JOIN stores s ON da.store_id = s.id
+    WHERE DATE(da.date_assigned) = ? 
+    AND da.status = 'completed'
+");
+$stmt->execute([$today]);
+$completed_malls = $stmt->fetchColumn() ?: 0;
+
+// Total bank submissions
+$stmt = $pdo->prepare("
+    SELECT COUNT(*) as total_submissions 
+    FROM bank_submissions bs 
+    WHERE DATE(bs.created_at) = ?
+");
+$stmt->execute([$today]);
+$total_submissions = $stmt->fetchColumn() ?: 0;
+
+// Total collected amount today
 $stmt = $pdo->prepare("
     SELECT SUM(c.amount_collected) as total_collected 
     FROM collections c 
@@ -17,15 +79,6 @@ $stmt = $pdo->prepare("
 $stmt->execute([$today]);
 $total_collected = $stmt->fetchColumn() ?: 0;
 
-// Total agents in transit (have assignments for today)
-$stmt = $pdo->prepare("
-    SELECT COUNT(DISTINCT da.agent_id) as agents_in_transit 
-    FROM daily_assignments da 
-    WHERE DATE(da.date_assigned) = ? AND da.status != 'submitted'
-");
-$stmt->execute([$today]);
-$agents_in_transit = $stmt->fetchColumn() ?: 0;
-
 // Completed orders today
 $stmt = $pdo->prepare("
     SELECT COUNT(*) as completed_orders 
@@ -34,11 +87,6 @@ $stmt = $pdo->prepare("
 ");
 $stmt->execute([$today]);
 $completed_orders = $stmt->fetchColumn() ?: 0;
-
-// Get all agents for the stats
-$stmt = $pdo->prepare("SELECT COUNT(*) as total_agents FROM users WHERE role = 'agent'");
-$stmt->execute();
-$total_agents = $stmt->fetchColumn() ?: 0;
 ?>
 
 <!DOCTYPE html>
@@ -88,18 +136,38 @@ $total_agents = $stmt->fetchColumn() ?: 0;
                 </div>
                 
                 <div class="stat-card">
-                    <h3><?php echo $agents_in_transit; ?></h3>
-                    <p>Agents In Transit</p>
+                    <h3><?php echo $agents_assigned; ?>/<?php echo $total_agents; ?></h3>
+                    <p>Agents Assigned/Total</p>
                 </div>
                 
                 <div class="stat-card">
-                    <h3><?php echo $completed_orders; ?></h3>
-                    <p>Completed Orders</p>
+                    <h3><?php echo $total_stores; ?></h3>
+                    <p>Shops Assigned</p>
                 </div>
                 
                 <div class="stat-card">
-                    <h3><?php echo $total_agents; ?></h3>
-                    <p>Total Agents</p>
+                    <h3><?php echo $completed_stores; ?>/<?php echo $total_stores; ?></h3>
+                    <p>Shops Completed</p>
+                </div>
+                
+                <div class="stat-card">
+                    <h3><?php echo $total_malls; ?></h3>
+                    <p>Regions/Malls Assigned</p>
+                </div>
+                
+                <div class="stat-card">
+                    <h3><?php echo $completed_malls; ?>/<?php echo $total_malls; ?></h3>
+                    <p>Malls Completed</p>
+                </div>
+                
+                <div class="stat-card">
+                    <h3><?php echo $total_submissions; ?></h3>
+                    <p>Total Bank Submissions</p>
+                </div>
+                
+                <div class="stat-card">
+                    <h3><?php echo number_format(($total_stores > 0 ? ($completed_stores / $total_stores) * 100 : 0), 2); ?>%</h3>
+                    <p>Completion Rate</p>
                 </div>
             </div>
             

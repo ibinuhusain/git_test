@@ -112,6 +112,7 @@ $remaining_assignments = $total_assignments - $completed_count;
             
             <h2>Your Assigned Entities (<?php echo date('M j, Y'); ?>)</h2>
             <?php if (count($assignments) > 0): ?>
+                <div class="table-responsive">
                 <table>
                     <thead>
                         <tr>
@@ -121,7 +122,6 @@ $remaining_assignments = $total_assignments - $completed_count;
                             <th>Entity</th>
                             <th>Brand</th>
                             <th>Address</th>
-                            <th>Target Amount</th>
                             <th>Collected</th>
                             <th>Status</th>
                             <th>Action</th>
@@ -150,7 +150,6 @@ $remaining_assignments = $total_assignments - $completed_count;
                                 <td><?php echo htmlspecialchars($store['entity'] ?? 'N/A'); ?></td>
                                 <td><?php echo htmlspecialchars($store['brand'] ?? 'N/A'); ?></td>
                                 <td><?php echo htmlspecialchars($assignment['store_address']); ?></td>
-                                <td><?php echo number_format($assignment['target_amount'], 2); ?></td>
                                 <td><?php echo number_format($collected_amount, 2); ?></td>
                                 <td>
                                     <span class="<?php echo $status === 'completed' ? 'status-completed' : 'status-pending'; ?>">
@@ -164,6 +163,7 @@ $remaining_assignments = $total_assignments - $completed_count;
                         <?php endforeach; ?>
                     </tbody>
                 </table>
+                </div>
             <?php else: ?>
                 <p>You have no assignments for today.</p>
             <?php endif; ?>
