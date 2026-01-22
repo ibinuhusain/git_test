@@ -1,7 +1,7 @@
 {
-    "name": "Apparel Group Collection Tracker",
-    "short_name": "AG Collector",
-    "description": "Track daily collections by agents for stores - Apparel Group System",
+    "name": "Apparels Collection",
+    "short_name": "Apparels Collection",
+    "description": "Track daily collections by agents for stores - Apparels Collection System",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#ffffff",

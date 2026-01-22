@@ -1,9 +1,54 @@
-// Client-side JavaScript for Collection Tracking App
+// Client-side JavaScript for Apparels Collection App
 
 // Function to handle offline data synchronization
 function syncOfflineData() {
     // In a real implementation, this would sync data when connection is restored
     console.log('Checking for offline data to sync...');
+    
+    // Check if we have any pending data to sync
+    const pendingData = JSON.parse(localStorage.getItem('pending_sync_data')) || [];
+    
+    if (pendingData.length > 0 && navigator.onLine) {
+        console.log(`Found ${pendingData.length} items to sync`);
+        
+        // Process each pending item
+        pendingData.forEach((item, index) => {
+            // Send data to server
+            fetch(item.url, {
+                method: item.method,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(item.data)
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Remove synced item from pending data
+                    pendingData.splice(index, 1);
+                    localStorage.setItem('pending_sync_data', JSON.stringify(pendingData));
+                    console.log('Data synced successfully:', item);
+                } else {
+                    console.error('Sync failed for item:', item);
+                }
+            })
+            .catch(error => {
+                console.error('Sync error:', error);
+            });
+        });
+    }
+}
+
+// Function to queue data for sync when offline
+function queueForSync(url, method, data) {
+    let pendingData = JSON.parse(localStorage.getItem('pending_sync_data')) || [];
+    pendingData.push({
+        url: url,
+        method: method,
+        data: data,
+        timestamp: new Date().toISOString()
+    });
+    localStorage.setItem('pending_sync_data', JSON.stringify(pendingData));
+    console.log('Data queued for sync:', {url, method, data});
 }
 
 // Function to periodically save data locally (every 5 minutes as requested)
@@ -23,8 +68,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // Set up periodic local backup (every 5 minutes = 300000 ms)
     setInterval(saveLocalBackup, 300000);
     
+    // Set up periodic sync check (every 5 minutes = 300000 ms)
+    setInterval(syncOfflineData, 300000);
+    
     // Initial backup
     saveLocalBackup();
+    
+    // Initial sync check
+    syncOfflineData();
     
     // Set up offline/online status indicators
     window.addEventListener('online', function() {
@@ -132,6 +183,18 @@ function cleanupOldData() {
             localStorage.removeItem('local_backup');
             console.log('Old backup data removed');
         }
+    }
+    
+    // Also cleanup old pending sync data
+    const pendingData = JSON.parse(localStorage.getItem('pending_sync_data')) || [];
+    const filteredPendingData = pendingData.filter(item => {
+        const itemTime = new Date(item.timestamp);
+        return itemTime >= twoDaysAgo; // Keep only recent items
+    });
+    
+    if (filteredPendingData.length !== pendingData.length) {
+        localStorage.setItem('pending_sync_data', JSON.stringify(filteredPendingData));
+        console.log('Cleaned up old pending sync data');
     }
 }
 

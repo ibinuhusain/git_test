@@ -238,4 +238,53 @@ tr:hover {
     .dashboard-stats {
         grid-template-columns: 1fr;
     }
+
+    /* Mobile-friendly tables */
+    table {
+        font-size: 0.9em;
+    }
+    
+    th, td {
+        padding: 8px 5px;
+    }
+    
+    /* Make tables scrollable on small screens */
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Adjust form elements for mobile */
+    .form-group {
+        margin-bottom: 12px;
+    }
+    
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="number"],
+    input[type="date"],
+    select,
+    textarea {
+        padding: 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 10px;
+    }
+    
+    .content {
+        padding: 15px;
+    }
+    
+    .stat-card h3 {
+        font-size: 2em;
+    }
+    
+    th, td {
+        padding: 6px 3px;
+        font-size: 0.85em;
+    }
 }
