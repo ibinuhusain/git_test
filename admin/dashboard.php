@@ -3,6 +3,7 @@ require_once '../includes/auth.php';
 requireAdmin();
 
 $pdo = getConnection();
+$today = date('Y-m-d'); // Define today's date
 
 // Get total agents
 $stmt = $pdo->prepare("SELECT COUNT(*) as total_agents FROM users WHERE role = 'agent'");
@@ -36,10 +37,6 @@ $total_submissions = $stmt->fetchColumn() ?: 0;
 
 // Calculate completion percentage
 $completion_percentage = $total_assignments > 0 ? round(($completed_assignments / $total_assignments) * 100, 2) : 0;
-// Total agents
-$stmt = $pdo->prepare("SELECT COUNT(*) as total_agents FROM users WHERE role = 'agent'");
-$stmt->execute();
-$total_agents = $stmt->fetchColumn() ?: 0;
 
 // Agents assigned today
 $stmt = $pdo->prepare("
@@ -197,38 +194,41 @@ $completed_orders = $stmt->fetchColumn() ?: 0;
                         <h3><?php echo $total_submissions; ?></h3>
                         <p>Bank Submissions</p>
                     </div>
-                    <h3><?php echo $agents_assigned; ?>/<?php echo $total_agents; ?></h3>
-                    <p>Agents Assigned/Total</p>
-                </div>
-                
-                <div class="stat-card">
-                    <h3><?php echo $total_stores; ?></h3>
-                    <p>Shops Assigned</p>
-                </div>
-                
-                <div class="stat-card">
-                    <h3><?php echo $completed_stores; ?>/<?php echo $total_stores; ?></h3>
-                    <p>Shops Completed</p>
-                </div>
-                
-                <div class="stat-card">
-                    <h3><?php echo $total_malls; ?></h3>
-                    <p>Regions/Malls Assigned</p>
-                </div>
-                
-                <div class="stat-card">
-                    <h3><?php echo $completed_malls; ?>/<?php echo $total_malls; ?></h3>
-                    <p>Malls Completed</p>
-                </div>
-                
-                <div class="stat-card">
-                    <h3><?php echo $total_submissions; ?></h3>
-                    <p>Total Bank Submissions</p>
-                </div>
-                
-                <div class="stat-card">
-                    <h3><?php echo number_format(($total_stores > 0 ? ($completed_stores / $total_stores) * 100 : 0), 2); ?>%</h3>
-                    <p>Completion Rate</p>
+                    
+                    <div class="stat-card">
+                        <h3><?php echo $agents_assigned; ?>/<?php echo $total_agents; ?></h3>
+                        <p>Agents Assigned/Total</p>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <h3><?php echo $total_stores; ?></h3>
+                        <p>Shops Assigned</p>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <h3><?php echo $completed_stores; ?>/<?php echo $total_stores; ?></h3>
+                        <p>Shops Completed</p>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <h3><?php echo $total_malls; ?></h3>
+                        <p>Regions/Malls Assigned</p>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <h3><?php echo $completed_malls; ?>/<?php echo $total_malls; ?></h3>
+                        <p>Malls Completed</p>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <h3><?php echo $total_submissions; ?></h3>
+                        <p>Total Bank Submissions</p>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <h3><?php echo number_format(($total_stores > 0 ? ($completed_stores / $total_stores) * 100 : 0), 2); ?>%</h3>
+                        <p>Completion Rate</p>
+                    </div>
                 </div>
             </div>
             

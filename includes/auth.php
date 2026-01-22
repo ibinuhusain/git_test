@@ -51,6 +51,16 @@ function hasRole($role) {
     return isset($_SESSION['role']) && $_SESSION['role'] === $role;
 }
 
+// Check if user is super admin
+function isSuperAdmin() {
+    return isset($_SESSION['role']) && $_SESSION['role'] === 'super_admin';
+}
+
+// Check if user is admin or higher
+function isAdminOrHigher() {
+    return isset($_SESSION['role']) && ($_SESSION['role'] === 'admin' || $_SESSION['role'] === 'super_admin');
+}
+
 // Redirect if not logged in
 function requireLogin() {
     if (!isLoggedIn()) {
@@ -61,7 +71,15 @@ function requireLogin() {
 
 // Redirect if not admin
 function requireAdmin() {
-    if (!hasRole('admin')) {
+    if (!isAdminOrHigher()) {
+        header("Location: ../index.php");
+        exit();
+    }
+}
+
+// Redirect if not super admin
+function requireSuperAdmin() {
+    if (!isSuperAdmin()) {
         header("Location: ../index.php");
         exit();
     }

@@ -22,21 +22,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['import_agents'])) {
                 while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
                     if (count($data) >= 4) {
                         $agent_name = trim($data[0]);
-                        $agent_number = trim($data[1]);
-                        $username = trim($data[2]);
+                        $username = trim($data[1]);
+                        $userid = trim($data[2]);
                         $phone = trim($data[3]);
+                        $password = !empty($data[4]) ? trim($data[4]) : 'password123'; // Password from column 5 if available
                         
                         if (!empty($agent_name) && !empty($username)) {
-                            // Hash a default password
-                            $default_password = password_hash('password123', PASSWORD_DEFAULT);
+                            // Hash the password
+                            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
                             
                             // Check if username already exists
                             $check_stmt = $pdo->prepare("SELECT id FROM users WHERE username = ?");
                             $check_stmt->execute([$username]);
                             
                             if (!$check_stmt->fetch()) {
-                                $stmt = $pdo->prepare("INSERT INTO users (name, phone, username, password, role) VALUES (?, ?, ?, ?, 'agent')");
-                                $stmt->execute([$agent_name, $phone, $username, $default_password]);
+                                $stmt = $pdo->prepare("INSERT INTO users (id, name, username, phone, password, role) VALUES (?, ?, ?, ?, ?, 'agent')");
+                                $stmt->execute([$userid, $agent_name, $username, $phone, $hashed_password]);
                                 $added_count++;
                             }
                         }
@@ -60,9 +61,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['import_agents'])) {
     }
 }
 
-// Get all agents
-$agents_stmt = $pdo->prepare("SELECT * FROM users WHERE role = 'agent' ORDER BY name");
-$agents_stmt->execute();
 // Get all agents
 $agents_stmt = $pdo->query("SELECT * FROM users WHERE role = 'agent' ORDER BY name");
 $agents = $agents_stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -107,7 +105,7 @@ $agents = $agents_stmt->fetchAll(PDO::FETCH_ASSOC);
                 <div class="form-group">
                     <label for="excel_file">Upload Excel File:</label>
                     <input type="file" id="excel_file" name="excel_file" accept=".xlsx,.xls,.csv" required>
-                    <small>Excel file should have columns: Agent Name, Number, Username, Phone Number</small>
+                    <small>Excel file should have columns: Agent_Name, Username, Userid, Phone, Password (optional - default will be used if blank)</small>
                 </div>
                 
                 <button type="submit" class="btn">Import from Excel</button>
@@ -115,7 +113,6 @@ $agents = $agents_stmt->fetchAll(PDO::FETCH_ASSOC);
             
             <hr style="margin: 30px 0;">
             
-            <h2>Agent List</h2>
             <h2>All Agents</h2>
             
             <div class="table-responsive">
@@ -123,7 +120,7 @@ $agents = $agents_stmt->fetchAll(PDO::FETCH_ASSOC);
                 <thead>
                     <tr>
                         <th>Agent Name</th>
-                        <th>Number</th>
+                        <th>User ID</th>
                         <th>Username</th>
                         <th>Phone</th>
                     </tr>
@@ -133,7 +130,6 @@ $agents = $agents_stmt->fetchAll(PDO::FETCH_ASSOC);
                         <tr>
                             <td><?php echo htmlspecialchars($agent['name']); ?></td>
                             <td><?php echo htmlspecialchars($agent['id']); ?></td>
-                            <td><?php echo $agent['id']; ?></td>
                             <td><?php echo htmlspecialchars($agent['username']); ?></td>
                             <td><?php echo htmlspecialchars($agent['phone']); ?></td>
                         </tr>

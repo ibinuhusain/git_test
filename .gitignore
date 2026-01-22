@@ -1,15 +1,9 @@
 ```
-# Environment
-.env
-.env.local
-*.env.*
-```gitignore
 # Compiled and build artifacts
 *.pyc
 __pycache__/
 
 # Dependencies
-node_modules/
 vendor/
 
 # Logs and temp files
@@ -17,25 +11,23 @@ vendor/
 *.tmp
 *.swp
 
+# Environment
+.env
+.env.local
+*.env.*
+
 # Editors
 .vscode/
 .idea/
 
-# Dependencies
-vendor/
-node_modules/
-
-# Build artifacts
-dist/
-build/
-*.phar
-
-# Cache
-.cache/
-*.cache
 # OS generated files
 .DS_Store
 Thumbs.db
+
+# Backup files
+*~
+*.bak
+*.backup
 
 # Coverage reports
 coverage/
@@ -46,15 +38,4 @@ htmlcov/
 dist/
 build/
 *.egg-info/
-
-# Python specific
-*.py[cod]
-*$py.class
-*.so
-.Python
-*.egg
-
-# Web specific
-.sw?
-.DS_Store
 ```
