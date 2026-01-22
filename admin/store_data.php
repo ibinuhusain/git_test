@@ -250,6 +250,7 @@ $pending_submissions = $pending_submissions_stmt->fetchAll(PDO::FETCH_ASSOC);
                 <a href="agents.php">Agents</a>
                 <a href="management.php">Management</a>
                 <a href="store_data.php" class="active">Store Data</a>
+                <a href="bank_approvals.php">Bank Approvals</a>
                 <a href="../logout.php" class="logout-btn">Logout</a>
             </div>
         </div>

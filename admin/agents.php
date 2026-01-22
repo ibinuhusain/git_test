@@ -85,6 +85,7 @@ $agents = $agents_stmt->fetchAll(PDO::FETCH_ASSOC);
                 <a href="agents.php" class="active">Agents</a>
                 <a href="management.php">Management</a>
                 <a href="store_data.php">Store Data</a>
+                <a href="bank_approvals.php">Bank Approvals</a>
                 <a href="../logout.php" class="logout-btn">Logout</a>
             </div>
         </div>
