@@ -4,41 +4,38 @@ requireAdmin();
 
 $pdo = getConnection();
 
-// Get today's date for statistics
-$today = date('Y-m-d');
-
-// Total collections today
-$stmt = $pdo->prepare("
-    SELECT SUM(c.amount_collected) as total_collected 
-    FROM collections c 
-    JOIN daily_assignments da ON c.assignment_id = da.id 
-    WHERE DATE(da.date_assigned) = ?
-");
-$stmt->execute([$today]);
-$total_collected = $stmt->fetchColumn() ?: 0;
-
-// Total agents in transit (have assignments for today)
-$stmt = $pdo->prepare("
-    SELECT COUNT(DISTINCT da.agent_id) as agents_in_transit 
-    FROM daily_assignments da 
-    WHERE DATE(da.date_assigned) = ? AND da.status != 'submitted'
-");
-$stmt->execute([$today]);
-$agents_in_transit = $stmt->fetchColumn() ?: 0;
-
-// Completed orders today
-$stmt = $pdo->prepare("
-    SELECT COUNT(*) as completed_orders 
-    FROM daily_assignments da 
-    WHERE DATE(da.date_assigned) = ? AND da.status = 'completed'
-");
-$stmt->execute([$today]);
-$completed_orders = $stmt->fetchColumn() ?: 0;
-
-// Get all agents for the stats
+// Get total agents
 $stmt = $pdo->prepare("SELECT COUNT(*) as total_agents FROM users WHERE role = 'agent'");
 $stmt->execute();
 $total_agents = $stmt->fetchColumn() ?: 0;
+
+// Get total stores
+$stmt = $pdo->prepare("SELECT COUNT(*) as total_stores FROM stores");
+$stmt->execute();
+$total_stores = $stmt->fetchColumn() ?: 0;
+
+// Get total regions
+$stmt = $pdo->prepare("SELECT COUNT(*) as total_regions FROM regions");
+$stmt->execute();
+$total_regions = $stmt->fetchColumn() ?: 0;
+
+// Get completed assignments
+$stmt = $pdo->prepare("SELECT COUNT(*) as completed_assignments FROM daily_assignments WHERE status = 'completed'");
+$stmt->execute();
+$completed_assignments = $stmt->fetchColumn() ?: 0;
+
+// Get total assignments
+$stmt = $pdo->prepare("SELECT COUNT(*) as total_assignments FROM daily_assignments");
+$stmt->execute();
+$total_assignments = $stmt->fetchColumn() ?: 0;
+
+// Get total bank submissions
+$stmt = $pdo->prepare("SELECT COUNT(*) as total_submissions FROM bank_submissions");
+$stmt->execute();
+$total_submissions = $stmt->fetchColumn() ?: 0;
+
+// Calculate completion percentage
+$completion_percentage = $total_assignments > 0 ? round(($completed_assignments / $total_assignments) * 100, 2) : 0;
 ?>
 
 <!DOCTYPE html>
@@ -79,33 +76,53 @@ $total_agents = $stmt->fetchColumn() ?: 0;
         </div>
         
         <div class="content">
-            <h2>Today's Summary</h2>
+            <h2>System Overview</h2>
             
             <div class="dashboard-stats">
                 <div class="stat-card">
-                    <h3><?php echo number_format($total_collected, 2); ?></h3>
-                    <p>Total Collected Today</p>
-                </div>
-                
-                <div class="stat-card">
-                    <h3><?php echo $agents_in_transit; ?></h3>
-                    <p>Agents In Transit</p>
-                </div>
-                
-                <div class="stat-card">
-                    <h3><?php echo $completed_orders; ?></h3>
-                    <p>Completed Orders</p>
-                </div>
-                
-                <div class="stat-card">
                     <h3><?php echo $total_agents; ?></h3>
-                    <p>Total Agents</p>
+                    <p>Agents</p>
+                </div>
+                
+                <div class="stat-card">
+                    <h3><?php echo $total_stores; ?></h3>
+                    <p>Shops Assigned</p>
+                </div>
+                
+                <div class="stat-card">
+                    <h3><?php echo $total_regions; ?></h3>
+                    <p>Regions Assigned</p>
+                </div>
+                
+                <div class="stat-card">
+                    <h3><?php echo $completion_percentage; ?>%</h3>
+                    <p>Completion Status</p>
                 </div>
             </div>
             
             <div style="margin-top: 30px;">
-                <h3>Daily Data Export</h3>
-                <a href="export_daily.php" class="btn btn-success">Export Today's Data</a>
+                <h3>Additional Information</h3>
+                <div class="dashboard-stats">
+                    <div class="stat-card">
+                        <h3><?php echo $total_assignments; ?></h3>
+                        <p>Total Assignments</p>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <h3><?php echo $completed_assignments; ?></h3>
+                        <p>Completed Assignments</p>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <h3><?php echo $total_submissions; ?></h3>
+                        <p>Bank Submissions</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 30px;">
+                <h3>Data Export</h3>
+                <a href="export_daily.php" class="btn btn-success">Export Daily Data</a>
                 <a href="export_weekly.php" class="btn btn-success">Export Weekly Data</a>
             </div>
         </div>

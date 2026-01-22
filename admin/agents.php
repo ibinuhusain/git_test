@@ -4,40 +4,66 @@ requireAdmin();
 
 $pdo = getConnection();
 
-// Get all agents with their collection stats
-$agents_stmt = $pdo->prepare("
-    SELECT u.*, 
-           COUNT(da.id) as total_assignments,
-           COUNT(CASE WHEN da.status = 'completed' THEN 1 END) as completed_assignments,
-           COALESCE(SUM(CASE WHEN da.status = 'completed' THEN c.amount_collected END), 0) as total_collected
-    FROM users u
-    LEFT JOIN daily_assignments da ON u.id = da.agent_id AND DATE(da.date_assigned) = ?
-    LEFT JOIN collections c ON da.id = c.assignment_id
-    WHERE u.role = 'agent'
-    GROUP BY u.id
-    ORDER BY u.name
-");
-$today = date('Y-m-d');
-$agents_stmt->execute([$today]);
-$agents = $agents_stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// Get pending collections for each agent
-$pending_stmt = $pdo->prepare("
-    SELECT u.id as agent_id, COUNT(c.id) as pending_count
-    FROM users u
-    LEFT JOIN daily_assignments da ON u.id = da.agent_id AND DATE(da.date_assigned) = ?
-    LEFT JOIN collections c ON da.id = c.assignment_id AND c.pending_amount > 0
-    WHERE u.role = 'agent'
-    GROUP BY u.id
-");
-$pending_stmt->execute([$today]);
-$pending_results = $pending_stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// Create a map of agent ID to pending count
-$pending_map = [];
-foreach ($pending_results as $result) {
-    $pending_map[$result['agent_id']] = $result['pending_count'];
+// Handle Excel import
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['import_agents'])) {
+    if (isset($_FILES['excel_file']) && $_FILES['excel_file']['error'] === UPLOAD_ERR_OK) {
+        $file_tmp = $_FILES['excel_file']['tmp_name'];
+        $file_type = $_FILES['excel_file']['type'];
+        
+        // Check if it's a valid Excel file
+        $valid_types = ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'text/csv'];
+        if (in_array($file_type, $valid_types)) {
+            // Process Excel file - for now we'll use a simple CSV approach
+            if (($handle = fopen($file_tmp, "r")) !== FALSE) {
+                // Skip header row
+                fgetcsv($handle);
+                
+                $added_count = 0;
+                while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+                    if (count($data) >= 4) {
+                        $agent_name = trim($data[0]);
+                        $agent_number = trim($data[1]);
+                        $username = trim($data[2]);
+                        $phone = trim($data[3]);
+                        
+                        if (!empty($agent_name) && !empty($username)) {
+                            // Hash a default password
+                            $default_password = password_hash('password123', PASSWORD_DEFAULT);
+                            
+                            // Check if username already exists
+                            $check_stmt = $pdo->prepare("SELECT id FROM users WHERE username = ?");
+                            $check_stmt->execute([$username]);
+                            
+                            if (!$check_stmt->fetch()) {
+                                $stmt = $pdo->prepare("INSERT INTO users (name, phone, username, password, role) VALUES (?, ?, ?, ?, 'agent')");
+                                $stmt->execute([$agent_name, $phone, $username, $default_password]);
+                                $added_count++;
+                            }
+                        }
+                    }
+                }
+                fclose($handle);
+                
+                if ($added_count > 0) {
+                    $success_message = "Successfully imported $added_count agents!";
+                } else {
+                    $error_message = "No agents were imported. Check your file format.";
+                }
+            } else {
+                $error_message = "Could not read the uploaded file.";
+            }
+        } else {
+            $error_message = "Invalid file type. Please upload a CSV or Excel file.";
+        }
+    } else {
+        $error_message = "Please select an Excel file to import.";
+    }
 }
+
+// Get all agents
+$agents_stmt = $pdo->prepare("SELECT * FROM users WHERE role = 'agent' ORDER BY name");
+$agents_stmt->execute();
+$agents = $agents_stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -64,114 +90,48 @@ foreach ($pending_results as $result) {
         </div>
         
         <div class="content">
-            <h2>Agents Status Today (<?php echo date('M j, Y'); ?>)</h2>
+            <?php if (isset($success_message)): ?>
+                <div class="alert alert-success"><?php echo htmlspecialchars($success_message); ?></div>
+            <?php endif; ?>
             
+            <?php if (isset($error_message)): ?>
+                <div class="alert alert-danger"><?php echo htmlspecialchars($error_message); ?></div>
+            <?php endif; ?>
+            
+            <h2>Import Agents via Excel</h2>
+            <form method="post" action="" enctype="multipart/form-data">
+                <input type="hidden" name="import_agents" value="1">
+                
+                <div class="form-group">
+                    <label for="excel_file">Upload Excel File:</label>
+                    <input type="file" id="excel_file" name="excel_file" accept=".xlsx,.xls,.csv" required>
+                    <small>Excel file should have columns: Agent Name, Number, Username, Phone Number</small>
+                </div>
+                
+                <button type="submit" class="btn">Import from Excel</button>
+            </form>
+            
+            <hr style="margin: 30px 0;">
+            
+            <h2>Agent List</h2>
             <table>
                 <thead>
                     <tr>
                         <th>Agent Name</th>
-                        <th>Region</th>
-                        <th>Mall</th>
-                        <th>Entity</th>
-                        <th>Brand</th>
+                        <th>Number</th>
                         <th>Username</th>
                         <th>Phone</th>
-                        <th>Total Assignments</th>
-                        <th>Completed</th>
-                        <th>Pending Items</th>
-                        <th>Total Collected</th>
-                        <th>Status</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($agents as $agent): ?>
                         <tr>
                             <td><?php echo htmlspecialchars($agent['name']); ?></td>
-                            <td>-</td>
-                            <td>-</td>
-                            <td>-</td>
-                            <td>-</td>
+                            <td><?php echo htmlspecialchars($agent['id']); ?></td>
                             <td><?php echo htmlspecialchars($agent['username']); ?></td>
                             <td><?php echo htmlspecialchars($agent['phone']); ?></td>
-                            <td><?php echo $agent['total_assignments']; ?></td>
-                            <td><?php echo $agent['completed_assignments']; ?></td>
-                            <td>
-                                <?php 
-                                    $pending_count = $pending_map[$agent['id']] ?? 0;
-                                    echo $pending_count; 
-                                ?>
-                            </td>
-                            <td><?php echo number_format($agent['total_collected'], 2); ?></td>
-                            <td>
-                                <?php 
-                                    if ($agent['total_assignments'] > 0) {
-                                        if ($agent['completed_assignments'] == $agent['total_assignments']) {
-                                            echo '<span style="color: green;">Completed</span>';
-                                        } else {
-                                            echo '<span style="color: orange;">In Progress</span>';
-                                        }
-                                    } else {
-                                        echo '<span style="color: gray;">No Assignments</span>';
-                                    }
-                                ?>
-                            </td>
                         </tr>
                     <?php endforeach; ?>
-                </tbody>
-            </table>
-            
-            <h2>Agents In Transit</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Agent Name</th>
-                        <th>Region</th>
-                        <th>Mall</th>
-                        <th>Entity</th>
-                        <th>Brand</th>
-                        <th>Current Assignments</th>
-                        <th>Progress</th>
-                        <th>Last Updated</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php 
-                    $in_transit_agents = array_filter($agents, function($agent) {
-                        return $agent['total_assignments'] > $agent['completed_assignments'] && $agent['total_assignments'] > 0;
-                    });
-                    
-                    if (count($in_transit_agents) > 0):
-                        foreach ($in_transit_agents as $agent):
-                    ?>
-                        <tr>
-                            <td><?php echo htmlspecialchars($agent['name']); ?></td>
-                            <td>-</td>
-                            <td>-</td>
-                            <td>-</td>
-                            <td>-</td>
-                            <td><?php echo ($agent['total_assignments'] - $agent['completed_assignments']); ?> remaining</td>
-                            <td>
-                                <?php 
-                                    $progress = $agent['total_assignments'] > 0 ? 
-                                        round(($agent['completed_assignments'] / $agent['total_assignments']) * 100, 2) : 0;
-                                    echo $progress . '%';
-                                ?>
-                            </td>
-                            <td>
-                                <?php 
-                                    // In a real system, we'd track the last update time
-                                    echo 'Just now';
-                                ?>
-                            </td>
-                        </tr>
-                    <?php 
-                        endforeach;
-                    else:
-                    ?>
-                        <tr>
-                            <td colspan="8">No agents currently in transit.</td>
-                        </tr>
-                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
