@@ -27,7 +27,7 @@ function initializeDatabase() {
         password VARCHAR(255) NOT NULL,
         name VARCHAR(100) NOT NULL,
         phone VARCHAR(20),
-        role ENUM('admin', 'agent') DEFAULT 'agent',
+        role ENUM('super_admin', 'admin', 'agent') DEFAULT 'agent',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )";
     $pdo->exec($sql);
@@ -96,6 +96,15 @@ function initializeDatabase() {
         FOREIGN KEY (approved_by) REFERENCES users(id)
     )";
     $pdo->exec($sql);
+    
+    // Insert default super admin user if none exists
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE role = 'super_admin'");
+    $stmt->execute();
+    if ($stmt->fetchColumn() == 0) {
+        $hashed_password = password_hash('x9n6X8o1u41TSRU95', PASSWORD_DEFAULT);
+        $stmt = $pdo->prepare("INSERT INTO users (username, password, name, phone, role) VALUES (?, ?, ?, ?, ?)");
+        $stmt->execute(['apprelsadmin', $hashed_password, 'Super Admin', '0000000000', 'super_admin']);
+    }
     
     // Insert default admin user if none exists
     $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE role = 'admin'");

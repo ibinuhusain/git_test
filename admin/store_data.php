@@ -103,7 +103,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             } else {
                 $error = "Invalid file type. Please upload a CSV or Excel file.";
-        if (isset($_FILES['excel_file_stores']) && $_FILES['excel_file_stores']['error'] === UPLOAD_ERR_OK) {
+            }
+        } elseif (isset($_FILES['excel_file_stores']) && $_FILES['excel_file_stores']['error'] === UPLOAD_ERR_OK) {
             $fileTmpPath = $_FILES['excel_file_stores']['tmp_name'];
             $fileName = $_FILES['excel_file_stores']['name'];
             $fileSize = $_FILES['excel_file_stores']['size'];
