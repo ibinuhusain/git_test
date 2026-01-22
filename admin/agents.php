@@ -63,6 +63,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['import_agents'])) {
 // Get all agents
 $agents_stmt = $pdo->prepare("SELECT * FROM users WHERE role = 'agent' ORDER BY name");
 $agents_stmt->execute();
+// Get all agents
+$agents_stmt = $pdo->query("SELECT * FROM users WHERE role = 'agent' ORDER BY name");
 $agents = $agents_stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
@@ -71,7 +73,7 @@ $agents = $agents_stmt->fetchAll(PDO::FETCH_ASSOC);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agents - Collection Tracking</title>
+    <title>Agents - Apparels Collection</title>
     <link rel="stylesheet" href="../css/style.css">
     <link rel="manifest" href="../manifest.json">
 </head>
@@ -114,6 +116,9 @@ $agents = $agents_stmt->fetchAll(PDO::FETCH_ASSOC);
             <hr style="margin: 30px 0;">
             
             <h2>Agent List</h2>
+            <h2>All Agents</h2>
+            
+            <div class="table-responsive">
             <table>
                 <thead>
                     <tr>
@@ -128,12 +133,14 @@ $agents = $agents_stmt->fetchAll(PDO::FETCH_ASSOC);
                         <tr>
                             <td><?php echo htmlspecialchars($agent['name']); ?></td>
                             <td><?php echo htmlspecialchars($agent['id']); ?></td>
+                            <td><?php echo $agent['id']; ?></td>
                             <td><?php echo htmlspecialchars($agent['username']); ?></td>
                             <td><?php echo htmlspecialchars($agent['phone']); ?></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
             </table>
+            </div>
         </div>
     </div>
 </body>

@@ -103,6 +103,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             } else {
                 $error = "Invalid file type. Please upload a CSV or Excel file.";
+        if (isset($_FILES['excel_file_stores']) && $_FILES['excel_file_stores']['error'] === UPLOAD_ERR_OK) {
+            $fileTmpPath = $_FILES['excel_file_stores']['tmp_name'];
+            $fileName = $_FILES['excel_file_stores']['name'];
+            $fileSize = $_FILES['excel_file_stores']['size'];
+            $fileType = $_FILES['excel_file_stores']['type'];
+            
+            $allowedTypes = ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'text/csv'];
+            if (in_array($fileType, $allowedTypes) || pathinfo($fileName, PATHINFO_EXTENSION) === 'csv') {
+                try {
+                    // Load the spreadsheet file
+                    $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($fileTmpPath);
+                    $worksheet = $spreadsheet->getActiveSheet();
+                    $rows = $worksheet->toArray();
+                    
+                    // Skip header row
+                    array_shift($rows);
+                    
+                    $importedCount = 0;
+                    foreach ($rows as $row) {
+                        if (!empty($row[0]) && !empty($row[1])) { // Storename and Store_ID are required
+                            $store_name = trim($row[0]);
+                            $store_id = trim($row[1]);
+                            $brand = trim($row[2] ?? '');
+                            $mall = trim($row[3] ?? '');
+                            $entity = trim($row[4] ?? '');
+                            
+                            // Check if store with this ID already exists
+                            $checkStmt = $pdo->prepare("SELECT id FROM stores WHERE id = ?");
+                            $checkStmt->execute([$store_id]);
+                            $existingStore = $checkStmt->fetch();
+                            
+                            if (!$existingStore) {
+                                // Insert the store with the specified ID
+                                $insertStmt = $pdo->prepare("INSERT INTO stores (id, name, mall, entity, brand, address, region_id) VALUES (?, ?, ?, ?, ?, '', 1)");
+                                $insertStmt->execute([$store_id, $store_name, $mall, $entity, $brand]);
+                                $importedCount++;
+                            } else {
+                                // Update existing store
+                                $updateStmt = $pdo->prepare("UPDATE stores SET name=?, mall=?, entity=?, brand=? WHERE id=?");
+                                $updateStmt->execute([$store_name, $mall, $entity, $brand, $store_id]);
+                                $importedCount++;
+                            }
+                        }
+                    }
+                    
+                    $message = "Successfully imported $importedCount stores from Excel file.";
+                } catch (Exception $e) {
+                    $error = "Error importing stores: " . $e->getMessage();
+                }
+            } else {
+                $error = "Invalid file type. Please upload an Excel (.xlsx, .xls) or CSV file.";
             }
         } else {
             $error = "Please select an Excel file to import.";
@@ -184,7 +235,7 @@ $pending_submissions = $pending_submissions_stmt->fetchAll(PDO::FETCH_ASSOC);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Store Data - Collection Tracking</title>
+    <title>Store Data - Apparels Collection</title>
     <link rel="stylesheet" href="../css/style.css">
     <link rel="manifest" href="../manifest.json">
 </head>
@@ -280,6 +331,21 @@ $pending_submissions = $pending_submissions_stmt->fetchAll(PDO::FETCH_ASSOC);
                 </div>
                 
                 <button type="submit" class="btn">Add Store</button>
+            </form>
+            
+            <hr style="margin: 30px 0;">
+
+            <h2>Import Stores via Excel</h2>
+            <form method="post" action="" enctype="multipart/form-data">
+                <input type="hidden" name="import_stores" value="1">
+                
+                <div class="form-group">
+                    <label for="excel_file_stores">Upload Excel File:</label>
+                    <input type="file" id="excel_file_stores" name="excel_file_stores" accept=".xlsx,.xls" required>
+                    <small>Excel file should have columns: Storename, Store_ID, Brand, Mall, Entity</small>
+                </div>
+                
+                <button type="submit" class="btn">Import Stores from Excel</button>
             </form>
             
             <hr style="margin: 30px 0;">

@@ -1,4 +1,4 @@
-# Collection Tracking System - Setup Guide
+# Apparels Collection - Setup Guide
 
 ## Prerequisites
 - XAMPP installed on your system
@@ -7,7 +7,7 @@
 ## Installation Steps
 
 1. **Copy Files to XAMPP Directory**
-   - Copy the entire `collection-tracking-system` folder to your XAMPP `htdocs` directory
+   - Copy the entire `apparels-collection` folder to your XAMPP `htdocs` directory
    - Usually located at: `C:\xampp\htdocs\`
 
 2. **Start XAMPP Services**
@@ -16,7 +16,7 @@
 
 3. **Access the Application**
    - Open your web browser
-   - Navigate to: `http://localhost/collection-tracking-system`
+   - Navigate to: `http://localhost/apparels-collection`
    - The database tables will be created automatically on first access
 
 4. **Login Credentials**
@@ -26,7 +26,7 @@
 
 ## Folder Structure
 ```
-collection-tracking-system/
+apparels-collection/
 ├── admin/              # Admin pages
 ├── agent/              # Agent pages  
 ├── css/                # Stylesheets

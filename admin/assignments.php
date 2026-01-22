@@ -77,6 +77,89 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['import_excel'])) {
             }
         } else {
             $error_message = "Invalid file type. Please upload a CSV or Excel file.";
+        $fileTmpPath = $_FILES['excel_file']['tmp_name'];
+        $fileName = $_FILES['excel_file']['name'];
+        $fileSize = $_FILES['excel_file']['size'];
+        $fileType = $_FILES['excel_file']['type'];
+        
+        $allowedTypes = ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'text/csv'];
+        if (in_array($fileType, $allowedTypes) || pathinfo($fileName, PATHINFO_EXTENSION) === 'csv') {
+            try {
+                // Load the spreadsheet file
+                $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($fileTmpPath);
+                $worksheet = $spreadsheet->getActiveSheet();
+                $rows = $worksheet->toArray();
+                
+                // Skip header row
+                array_shift($rows);
+                
+                $importedCount = 0;
+                foreach ($rows as $row) {
+                    if (!empty($row[0]) && !empty($row[1])) { // Agent_Name and Region are required
+                        $agent_name = trim($row[0]);
+                        $region = trim($row[1]);
+                        $mall = trim($row[2] ?? '');
+                        $entity = trim($row[3] ?? '');
+                        $brand = trim($row[4] ?? '');
+                        
+                        // Find agent by name
+                        $agentStmt = $pdo->prepare("SELECT id FROM users WHERE name = ? AND role = 'agent'");
+                        $agentStmt->execute([$agent_name]);
+                        $agent = $agentStmt->fetch(PDO::FETCH_ASSOC);
+                        
+                        if ($agent) {
+                            // Find region by name
+                            $regionStmt = $pdo->prepare("SELECT id FROM regions WHERE name = ?");
+                            $regionStmt->execute([$region]);
+                            $regionResult = $regionStmt->fetch(PDO::FETCH_ASSOC);
+                            
+                            if ($regionResult) {
+                                $region_id = $regionResult['id'];
+                                
+                                // Find stores matching the criteria
+                                $storeStmt = $pdo->prepare("SELECT id FROM stores WHERE region_id = ? AND mall LIKE ? AND entity LIKE ?");
+                                $storeStmt->execute([$region_id, "%$mall%", "%$entity%"]);
+                                $stores = $storeStmt->fetchAll(PDO::FETCH_ASSOC);
+                                
+                                foreach ($stores as $store) {
+                                    // Create assignment
+                                    $assignmentStmt = $pdo->prepare("INSERT INTO daily_assignments (agent_id, store_id, date_assigned, status) VALUES (?, ?, ?, 'pending')");
+                                    $assignmentStmt->execute([$agent['id'], $store['id'], date('Y-m-d')]);
+                                }
+                                
+                                $importedCount++;
+                            } else {
+                                // If region doesn't exist, create it
+                                $createRegionStmt = $pdo->prepare("INSERT INTO regions (name) VALUES (?)");
+                                $createRegionStmt->execute([$region]);
+                                $region_id = $pdo->lastInsertId();
+                                
+                                // Find stores matching the criteria
+                                $storeStmt = $pdo->prepare("SELECT id FROM stores WHERE region_id = ? AND mall LIKE ? AND entity LIKE ?");
+                                $storeStmt->execute([$region_id, "%$mall%", "%$entity%"]);
+                                $stores = $storeStmt->fetchAll(PDO::FETCH_ASSOC);
+                                
+                                foreach ($stores as $store) {
+                                    // Create assignment
+                                    $assignmentStmt = $pdo->prepare("INSERT INTO daily_assignments (agent_id, store_id, date_assigned, status) VALUES (?, ?, ?, 'pending')");
+                                    $assignmentStmt->execute([$agent['id'], $store['id'], date('Y-m-d')]);
+                                }
+                                
+                                $importedCount++;
+                            }
+                        } else {
+                            $error_message = "Agent '$agent_name' does not exist.";
+                            break;
+                        }
+                    }
+                }
+                
+                $success_message = "Successfully imported $importedCount assignments from Excel file.";
+            } catch (Exception $e) {
+                $error_message = "Error importing assignments: " . $e->getMessage();
+            }
+        } else {
+            $error_message = "Invalid file type. Please upload an Excel (.xlsx, .xls) or CSV file.";
         }
     } else {
         $error_message = "Please select an Excel file to import.";
@@ -111,7 +194,7 @@ $today_assignments = $assignments_stmt->fetchAll(PDO::FETCH_ASSOC);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Assignments - Collection Tracking</title>
+    <title>Assignments - Apparels Collection</title>
     <link rel="stylesheet" href="../css/style.css">
     <link rel="manifest" href="../manifest.json">
 </head>
@@ -195,6 +278,7 @@ $today_assignments = $assignments_stmt->fetchAll(PDO::FETCH_ASSOC);
                 <div class="form-group">
                     <label for="excel_file">Upload Excel File:</label>
                     <input type="file" id="excel_file" name="excel_file" accept=".xlsx,.xls,.csv" required>
+                    <input type="file" id="excel_file" name="excel_file" accept=".xlsx,.xls" required>
                     <small>Excel file should have columns: Agent_Name, Region, Mall, Entity, Brand</small>
                 </div>
                 
@@ -211,6 +295,9 @@ $today_assignments = $assignments_stmt->fetchAll(PDO::FETCH_ASSOC);
                             <th>Agent</th>
                             <th>Store</th>
                             <th>Region</th>
+                            <th>Mall</th>
+                            <th>Entity</th>
+                            <th>Brand</th>
                             <th>Status</th>
                         </tr>
                     </thead>
@@ -220,6 +307,9 @@ $today_assignments = $assignments_stmt->fetchAll(PDO::FETCH_ASSOC);
                                 <td><?php echo htmlspecialchars($assignment['agent_name']); ?></td>
                                 <td><?php echo htmlspecialchars($assignment['store_name']); ?></td>
                                 <td><?php echo htmlspecialchars($assignment['region_name'] ?? 'N/A'); ?></td>
+                                <td><?php echo htmlspecialchars($assignment['mall'] ?? 'N/A'); ?></td>
+                                <td><?php echo htmlspecialchars($assignment['entity'] ?? 'N/A'); ?></td>
+                                <td><?php echo htmlspecialchars($assignment['brand'] ?? 'N/A'); ?></td>
                                 <td>
                                     <span class="status-<?php echo $assignment['status']; ?>">
                                         <?php 
