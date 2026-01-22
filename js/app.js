@@ -1,4 +1,4 @@
-// Client-side JavaScript for Collection Tracking App
+// Client-side JavaScript for Apparels Collection App
 
 // Function to handle offline data synchronization
 function syncOfflineData() {

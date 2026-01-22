@@ -55,7 +55,7 @@ $remaining_assignments = $total_assignments - $completed_count;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agent Dashboard - Collection Tracking</title>
+    <title>Agent Dashboard - Apparels Collection</title>
     <link rel="stylesheet" href="../css/style.css">
     <link rel="manifest" href="../manifest.json">
     <script>

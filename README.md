@@ -1,4 +1,4 @@
-# Collection Tracking System
+# Apparels Collection
 
 A Progressive Web Application (PWA) for tracking daily collections by agents for a large supplier.
 
@@ -30,7 +30,7 @@ A Progressive Web Application (PWA) for tracking daily collections by agents for
 1. Make sure you have XAMPP installed with PHP and MySQL
 2. Place this project in your XAMPP `htdocs` directory
 3. Start Apache and MySQL through XAMPP Control Panel
-4. Access the application via `http://localhost/collection-tracking-system`
+4. Access the application via `http://localhost/apparels-collection`
 5. Login with default credentials:
    - Username: `admin`
    - Password: `admin123`
