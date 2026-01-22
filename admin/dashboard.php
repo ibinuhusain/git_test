@@ -4,9 +4,38 @@ requireAdmin();
 
 $pdo = getConnection();
 
-// Get today's date for statistics
-$today = date('Y-m-d');
+// Get total agents
+$stmt = $pdo->prepare("SELECT COUNT(*) as total_agents FROM users WHERE role = 'agent'");
+$stmt->execute();
+$total_agents = $stmt->fetchColumn() ?: 0;
 
+// Get total stores
+$stmt = $pdo->prepare("SELECT COUNT(*) as total_stores FROM stores");
+$stmt->execute();
+$total_stores = $stmt->fetchColumn() ?: 0;
+
+// Get total regions
+$stmt = $pdo->prepare("SELECT COUNT(*) as total_regions FROM regions");
+$stmt->execute();
+$total_regions = $stmt->fetchColumn() ?: 0;
+
+// Get completed assignments
+$stmt = $pdo->prepare("SELECT COUNT(*) as completed_assignments FROM daily_assignments WHERE status = 'completed'");
+$stmt->execute();
+$completed_assignments = $stmt->fetchColumn() ?: 0;
+
+// Get total assignments
+$stmt = $pdo->prepare("SELECT COUNT(*) as total_assignments FROM daily_assignments");
+$stmt->execute();
+$total_assignments = $stmt->fetchColumn() ?: 0;
+
+// Get total bank submissions
+$stmt = $pdo->prepare("SELECT COUNT(*) as total_submissions FROM bank_submissions");
+$stmt->execute();
+$total_submissions = $stmt->fetchColumn() ?: 0;
+
+// Calculate completion percentage
+$completion_percentage = $total_assignments > 0 ? round(($completed_assignments / $total_assignments) * 100, 2) : 0;
 // Total agents
 $stmt = $pdo->prepare("SELECT COUNT(*) as total_agents FROM users WHERE role = 'agent'");
 $stmt->execute();
@@ -127,15 +156,47 @@ $completed_orders = $stmt->fetchColumn() ?: 0;
         </div>
         
         <div class="content">
-            <h2>Today's Summary</h2>
+            <h2>System Overview</h2>
             
             <div class="dashboard-stats">
                 <div class="stat-card">
-                    <h3><?php echo number_format($total_collected, 2); ?></h3>
-                    <p>Total Collected Today</p>
+                    <h3><?php echo $total_agents; ?></h3>
+                    <p>Agents</p>
                 </div>
                 
                 <div class="stat-card">
+                    <h3><?php echo $total_stores; ?></h3>
+                    <p>Shops Assigned</p>
+                </div>
+                
+                <div class="stat-card">
+                    <h3><?php echo $total_regions; ?></h3>
+                    <p>Regions Assigned</p>
+                </div>
+                
+                <div class="stat-card">
+                    <h3><?php echo $completion_percentage; ?>%</h3>
+                    <p>Completion Status</p>
+                </div>
+            </div>
+            
+            <div style="margin-top: 30px;">
+                <h3>Additional Information</h3>
+                <div class="dashboard-stats">
+                    <div class="stat-card">
+                        <h3><?php echo $total_assignments; ?></h3>
+                        <p>Total Assignments</p>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <h3><?php echo $completed_assignments; ?></h3>
+                        <p>Completed Assignments</p>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <h3><?php echo $total_submissions; ?></h3>
+                        <p>Bank Submissions</p>
+                    </div>
                     <h3><?php echo $agents_assigned; ?>/<?php echo $total_agents; ?></h3>
                     <p>Agents Assigned/Total</p>
                 </div>
@@ -172,8 +233,8 @@ $completed_orders = $stmt->fetchColumn() ?: 0;
             </div>
             
             <div style="margin-top: 30px;">
-                <h3>Daily Data Export</h3>
-                <a href="export_daily.php" class="btn btn-success">Export Today's Data</a>
+                <h3>Data Export</h3>
+                <a href="export_daily.php" class="btn btn-success">Export Daily Data</a>
                 <a href="export_weekly.php" class="btn btn-success">Export Weekly Data</a>
             </div>
         </div>

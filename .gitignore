@@ -1,3 +1,8 @@
+```
+# Environment
+.env
+.env.local
+*.env.*
 ```gitignore
 # Compiled and build artifacts
 *.pyc
@@ -12,15 +17,22 @@ vendor/
 *.tmp
 *.swp
 
-# Environment
-.env
-.env.local
-*.env.*
-
 # Editors
 .vscode/
 .idea/
 
+# Dependencies
+vendor/
+node_modules/
+
+# Build artifacts
+dist/
+build/
+*.phar
+
+# Cache
+.cache/
+*.cache
 # OS generated files
 .DS_Store
 Thumbs.db
