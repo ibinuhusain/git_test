@@ -64,114 +64,26 @@ foreach ($pending_results as $result) {
         </div>
         
         <div class="content">
-            <h2>Agents Status Today (<?php echo date('M j, Y'); ?>)</h2>
+            <h2>All Agents</h2>
             
             <table>
                 <thead>
                     <tr>
                         <th>Agent Name</th>
-                        <th>Region</th>
-                        <th>Mall</th>
-                        <th>Entity</th>
-                        <th>Brand</th>
+                        <th>Number</th>
                         <th>Username</th>
                         <th>Phone</th>
-                        <th>Total Assignments</th>
-                        <th>Completed</th>
-                        <th>Pending Items</th>
-                        <th>Total Collected</th>
-                        <th>Status</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($agents as $agent): ?>
                         <tr>
                             <td><?php echo htmlspecialchars($agent['name']); ?></td>
-                            <td>-</td>
-                            <td>-</td>
-                            <td>-</td>
-                            <td>-</td>
+                            <td><?php echo $agent['id']; ?></td>
                             <td><?php echo htmlspecialchars($agent['username']); ?></td>
                             <td><?php echo htmlspecialchars($agent['phone']); ?></td>
-                            <td><?php echo $agent['total_assignments']; ?></td>
-                            <td><?php echo $agent['completed_assignments']; ?></td>
-                            <td>
-                                <?php 
-                                    $pending_count = $pending_map[$agent['id']] ?? 0;
-                                    echo $pending_count; 
-                                ?>
-                            </td>
-                            <td><?php echo number_format($agent['total_collected'], 2); ?></td>
-                            <td>
-                                <?php 
-                                    if ($agent['total_assignments'] > 0) {
-                                        if ($agent['completed_assignments'] == $agent['total_assignments']) {
-                                            echo '<span style="color: green;">Completed</span>';
-                                        } else {
-                                            echo '<span style="color: orange;">In Progress</span>';
-                                        }
-                                    } else {
-                                        echo '<span style="color: gray;">No Assignments</span>';
-                                    }
-                                ?>
-                            </td>
                         </tr>
                     <?php endforeach; ?>
-                </tbody>
-            </table>
-            
-            <h2>Agents In Transit</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Agent Name</th>
-                        <th>Region</th>
-                        <th>Mall</th>
-                        <th>Entity</th>
-                        <th>Brand</th>
-                        <th>Current Assignments</th>
-                        <th>Progress</th>
-                        <th>Last Updated</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php 
-                    $in_transit_agents = array_filter($agents, function($agent) {
-                        return $agent['total_assignments'] > $agent['completed_assignments'] && $agent['total_assignments'] > 0;
-                    });
-                    
-                    if (count($in_transit_agents) > 0):
-                        foreach ($in_transit_agents as $agent):
-                    ?>
-                        <tr>
-                            <td><?php echo htmlspecialchars($agent['name']); ?></td>
-                            <td>-</td>
-                            <td>-</td>
-                            <td>-</td>
-                            <td>-</td>
-                            <td><?php echo ($agent['total_assignments'] - $agent['completed_assignments']); ?> remaining</td>
-                            <td>
-                                <?php 
-                                    $progress = $agent['total_assignments'] > 0 ? 
-                                        round(($agent['completed_assignments'] / $agent['total_assignments']) * 100, 2) : 0;
-                                    echo $progress . '%';
-                                ?>
-                            </td>
-                            <td>
-                                <?php 
-                                    // In a real system, we'd track the last update time
-                                    echo 'Just now';
-                                ?>
-                            </td>
-                        </tr>
-                    <?php 
-                        endforeach;
-                    else:
-                    ?>
-                        <tr>
-                            <td colspan="8">No agents currently in transit.</td>
-                        </tr>
-                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
