@@ -1,3 +1,4 @@
+```gitignore
 # Compiled and build artifacts
 *.pyc
 __pycache__/
@@ -5,6 +6,7 @@ __pycache__/
 # Dependencies
 node_modules/
 vendor/
+composer.lock
 
 # Logs and temp files
 *.log
@@ -24,12 +26,22 @@ vendor/
 .DS_Store
 Thumbs.db
 
-# Coverage reports
-coverage/
-htmlcov/
-.coverage
+# Backup files
+*~
+*.bak
+*.backup
 
 # Distribution / packaging
 dist/
 build/
-*.egg-info/
+*.tar.gz
+*.zip
+
+# PHP specific
+*.php~
+.htaccess
+
+# JavaScript/CSS build artifacts
+*.min.js
+*.min.css
+```

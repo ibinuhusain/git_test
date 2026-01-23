@@ -119,6 +119,35 @@ document.addEventListener('DOMContentLoaded', function() {
             location.reload();
         }, 600000); // 10 minutes
     }
+    
+    // Hamburger menu functionality
+    const hamburger = document.querySelector('.hamburger');
+    const navLinks = document.querySelector('.nav-links');
+    
+    if (hamburger && navLinks) {
+        hamburger.addEventListener('click', function() {
+            navLinks.classList.toggle('active');
+            
+            // Animate hamburger lines
+            const lines = hamburger.querySelectorAll('.hamburger-line');
+            lines[0].classList.toggle('hamburger-line-open-top');
+            lines[1].classList.toggle('hamburger-line-open-middle');
+            lines[2].classList.toggle('hamburger-line-open-bottom');
+        });
+        
+        // Close menu when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!hamburger.contains(event.target) && !navLinks.contains(event.target)) {
+                navLinks.classList.remove('active');
+                
+                // Remove animation classes
+                const lines = hamburger.querySelectorAll('.hamburger-line');
+                lines[0].classList.remove('hamburger-line-open-top');
+                lines[1].classList.remove('hamburger-line-open-middle');
+                lines[2].classList.remove('hamburger-line-open-bottom');
+            }
+        });
+    }
 });
 
 // Function to handle image previews for file inputs
@@ -200,34 +229,3 @@ function cleanupOldData() {
 
 // Run cleanup when app loads
 cleanupOldData();
-
-// Hamburger menu functionality
-document.addEventListener('DOMContentLoaded', function() {
-    const hamburger = document.querySelector('.hamburger');
-    const navLinks = document.querySelector('.nav-links');
-    
-    if (hamburger && navLinks) {
-        hamburger.addEventListener('click', function() {
-            navLinks.classList.toggle('active');
-            
-            // Animate hamburger lines
-            const lines = hamburger.querySelectorAll('.hamburger-line');
-            lines[0].classList.toggle('hamburger-line-open-top');
-            lines[1].classList.toggle('hamburger-line-open-middle');
-            lines[2].classList.toggle('hamburger-line-open-bottom');
-        });
-        
-        // Close menu when clicking outside
-        document.addEventListener('click', function(event) {
-            if (!hamburger.contains(event.target) && !navLinks.contains(event.target)) {
-                navLinks.classList.remove('active');
-                
-                // Remove animation classes
-                const lines = hamburger.querySelectorAll('.hamburger-line');
-                lines[0].classList.remove('hamburger-line-open-top');
-                lines[1].classList.remove('hamburger-line-open-middle');
-                lines[2].classList.remove('hamburger-line-open-bottom');
-            }
-        });
-    }
-});

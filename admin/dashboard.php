@@ -123,6 +123,7 @@ $completed_orders = $stmt->fetchColumn() ?: 0;
     <title>Admin Dashboard - Apparels Collection</title>
     <link rel="stylesheet" href="../css/style.css">
     <link rel="manifest" href="../manifest.json">
+    <script src="../js/app.js"></script>
     <script>
         // Register service worker for PWA functionality
         if ('serviceWorker' in navigator) {

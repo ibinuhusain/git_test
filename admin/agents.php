@@ -74,6 +74,7 @@ $agents = $agents_stmt->fetchAll(PDO::FETCH_ASSOC);
     <title>Agents - Apparels Collection</title>
     <link rel="stylesheet" href="../css/style.css">
     <link rel="manifest" href="../manifest.json">
+    <script src="../js/app.js"></script>
 </head>
 <body>
     <div class="container">
