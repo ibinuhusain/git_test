@@ -56,6 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     fgetcsv($handle);
                     
                     $added_count = 0;
+                    $duplicate_count = 0;
                     while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
                         if (count($data) >= 4) {
                             $store_name = trim($data[0]);
@@ -85,16 +86,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     }
                                     
                                     $stmt = $pdo->prepare("INSERT INTO stores (name, mall, entity, brand, region_id) VALUES (?, ?, ?, ?, ?)");
-                                    $stmt->execute([$store_name, $mall, $entity, $brand, $region_id]);
-                                    $added_count++;
+                                    if ($stmt->execute([$store_name, $mall, $entity, $brand, $region_id])) {
+                                        $added_count++;
+                                    }
+                                } else {
+                                    $duplicate_count++;
                                 }
                             }
                         }
                     }
                     fclose($handle);
                     
+                    $message_parts = [];
                     if ($added_count > 0) {
-                        $message = "Successfully imported $added_count stores!";
+                        $message_parts[] = "Successfully imported $added_count stores!";
+                    }
+                    if ($duplicate_count > 0) {
+                        $message_parts[] = "$duplicate_count duplicate stores skipped.";
+                    }
+                    
+                    if (!empty($message_parts)) {
+                        $message = implode(" ", $message_parts);
                     } else {
                         $error = "No stores were imported. Check your file format.";
                     }
@@ -122,6 +134,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     array_shift($rows);
                     
                     $importedCount = 0;
+                    $duplicateCount = 0;
                     foreach ($rows as $row) {
                         if (!empty($row[0]) && !empty($row[1])) { // Storename and Store_ID are required
                             $store_name = trim($row[0]);
@@ -130,26 +143,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $mall = trim($row[3] ?? '');
                             $entity = trim($row[4] ?? '');
                             
-                            // Check if store with this ID already exists
-                            $checkStmt = $pdo->prepare("SELECT id FROM stores WHERE id = ?");
-                            $checkStmt->execute([$store_id]);
+                            // Check if store with this name already exists
+                            $checkStmt = $pdo->prepare("SELECT id FROM stores WHERE name = ?");
+                            $checkStmt->execute([$store_name]);
                             $existingStore = $checkStmt->fetch();
                             
                             if (!$existingStore) {
-                                // Insert the store with the specified ID
-                                $insertStmt = $pdo->prepare("INSERT INTO stores (id, name, mall, entity, brand, address, region_id) VALUES (?, ?, ?, ?, ?, '', 1)");
-                                $insertStmt->execute([$store_id, $store_name, $mall, $entity, $brand]);
-                                $importedCount++;
+                                // Insert the store with the specified ID if it doesn't exist
+                                $insertStmt = $pdo->prepare("INSERT INTO stores (name, mall, entity, brand, address, region_id) VALUES (?, ?, ?, ?, '', 1)");
+                                if ($insertStmt->execute([$store_name, $mall, $entity, $brand])) {
+                                    $importedCount++;
+                                }
                             } else {
-                                // Update existing store
-                                $updateStmt = $pdo->prepare("UPDATE stores SET name=?, mall=?, entity=?, brand=? WHERE id=?");
-                                $updateStmt->execute([$store_name, $mall, $entity, $brand, $store_id]);
-                                $importedCount++;
+                                $duplicateCount++;
                             }
                         }
                     }
                     
-                    $message = "Successfully imported $importedCount stores from Excel file.";
+                    $message_parts = [];
+                    if ($importedCount > 0) {
+                        $message_parts[] = "Successfully imported $importedCount stores from Excel file.";
+                    }
+                    if ($duplicateCount > 0) {
+                        $message_parts[] = "$duplicateCount duplicate stores skipped.";
+                    }
+                    
+                    if (!empty($message_parts)) {
+                        $message = implode(" ", $message_parts);
+                    }
                 } catch (Exception $e) {
                     $error = "Error importing stores: " . $e->getMessage();
                 }
@@ -243,7 +264,10 @@ $pending_submissions = $pending_submissions_stmt->fetchAll(PDO::FETCH_ASSOC);
 <body>
     <div class="container">
         <div class="header">
-            <h1>Store Data</h1>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <img src="../images/logo/apparel-logo.svg" alt="Apparels Logo" style="height: 40px;">
+                <h1>Store Data</h1>
+            </div>
             <div class="nav-links">
                 <a href="dashboard.php">Home</a>
                 <a href="assignments.php">Assignments</a>

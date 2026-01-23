@@ -141,7 +141,10 @@ $completed_orders = $stmt->fetchColumn() ?: 0;
 <body>
     <div class="container">
         <div class="header">
-            <h1>Admin Dashboard</h1>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <img src="../images/logo/apparel-logo.svg" alt="Apparels Logo" style="height: 40px;">
+                <h1>Admin Dashboard</h1>
+            </div>
             <div class="nav-links">
                 <a href="dashboard.php" class="active">Home</a>
                 <a href="assignments.php">Assignments</a>

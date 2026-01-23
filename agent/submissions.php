@@ -108,7 +108,10 @@ $submission_history = $history_stmt->fetchAll(PDO::FETCH_ASSOC);
 <body>
     <div class="container">
         <div class="header">
-            <h1>Bank Submissions</h1>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <img src="../images/logo/apparel-logo.svg" alt="Apparels Logo" style="height: 40px;">
+                <h1>Bank Submissions</h1>
+            </div>
             <div class="nav-links">
                 <a href="dashboard.php">Dashboard</a>
                 <a href="store.php">Store</a>
