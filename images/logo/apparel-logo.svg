@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 80">
+  <!-- Background -->
+  <rect width="200" height="80" fill="#FAFCFA"/>
+  
+  <!-- Main design elements -->
+  <circle cx="40" cy="40" r="25" fill="#0F2F84"/>
+  <rect x="70" y="20" width="100" height="15" rx="5" fill="#072676"/>
+  <rect x="70" y="45" width="80" height="15" rx="5" fill="#BCC6CB"/>
+  
+  <!-- Text placeholder -->
+  <text x="75" y="35" font-family="Arial, sans-serif" font-size="16" fill="#04257E">APPARELS</text>
+  <text x="75" y="55" font-family="Arial, sans-serif" font-size="12" fill="#0F2F84">Collection System</text>
+</svg>

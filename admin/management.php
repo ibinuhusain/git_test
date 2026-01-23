@@ -58,7 +58,10 @@ $users = $users_stmt->fetchAll(PDO::FETCH_ASSOC);
 <body>
     <div class="container">
         <div class="header">
-            <h1>Management</h1>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <img src="../images/logo/apparel-logo.svg" alt="Apparels Logo" style="height: 40px;">
+                <h1>Management</h1>
+            </div>
             <div class="nav-links">
                 <a href="dashboard.php">Home</a>
                 <a href="assignments.php">Assignments</a>
