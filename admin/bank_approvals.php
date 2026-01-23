@@ -63,18 +63,21 @@ $agents = $agents_stmt->fetchAll(PDO::FETCH_ASSOC);
 </head>
 <body>
     <div class="container">
-        <div class="header">
+    <div class="header">
+        <div class="logo-container">
+            <img src="../images/logo.svg" alt="Apparels Collection Logo" />
             <h1>Bank Submissions Approval</h1>
-            <div class="nav-links">
-                <a href="dashboard.php">Home</a>
-                <a href="assignments.php">Assignments</a>
-                <a href="agents.php">Agents</a>
-                <a href="management.php">Management</a>
-                <a href="store_data.php">Store Data</a>
-                <a href="bank_approvals.php" class="active">Bank Approvals</a>
-                <a href="../logout.php" class="logout-btn">Logout</a>
-            </div>
         </div>
+        <div class="nav-links">
+            <a href="dashboard.php">Home</a>
+            <a href="assignments.php">Assignments</a>
+            <a href="agents.php">Agents</a>
+            <a href="management.php">Management</a>
+            <a href="store_data.php">Store Data</a>
+            <a href="bank_approvals.php" class="active">Bank Approvals</a>
+            <a href="../logout.php" class="logout-btn">Logout</a>
+        </div>
+    </div>
         
         <div class="content">
             <?php if ($message): ?>

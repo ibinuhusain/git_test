@@ -10,12 +10,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['assign_shops'])) {
     $selected_stores = $_POST['stores'];
     $assignment_date = $_POST['assignment_date'] ?? date('Y-m-d');
     
+    $assigned_count = 0;
+    $duplicate_count = 0;
+    
     foreach ($selected_stores as $store_id) {
-        $stmt = $pdo->prepare("INSERT INTO daily_assignments (agent_id, store_id, date_assigned) VALUES (?, ?, ?)");
-        $stmt->execute([$agent_id, $store_id, $assignment_date]);
+        // Check if this agent is already assigned to this store on the same date
+        $check_stmt = $pdo->prepare("SELECT id FROM daily_assignments WHERE agent_id = ? AND store_id = ? AND date_assigned = ?");
+        $check_stmt->execute([$agent_id, $store_id, $assignment_date]);
+        
+        if ($check_stmt->rowCount() == 0) {
+            // Only assign if not already assigned
+            $stmt = $pdo->prepare("INSERT INTO daily_assignments (agent_id, store_id, date_assigned) VALUES (?, ?, ?)");
+            $stmt->execute([$agent_id, $store_id, $assignment_date]);
+            $assigned_count++;
+        } else {
+            $duplicate_count++;
+        }
     }
     
-    $success_message = "Shops assigned successfully!";
+    if ($assigned_count > 0 && $duplicate_count > 0) {
+        $success_message = "Successfully assigned $assigned_count store(s). $duplicate_count duplicate assignment(s) skipped.";
+    } elseif ($assigned_count > 0) {
+        $success_message = "Successfully assigned $assigned_count store(s).";
+    } else {
+        $warning_message = "No new stores were assigned. All selected stores were already assigned to this agent on this date.";
+    }
 }
 
 // Handle Excel import
@@ -203,22 +222,29 @@ $today_assignments = $assignments_stmt->fetchAll(PDO::FETCH_ASSOC);
 </head>
 <body>
     <div class="container">
-        <div class="header">
+    <div class="header">
+        <div class="logo-container">
+            <img src="../images/logo.svg" alt="Apparels Collection Logo" />
             <h1>Assignments</h1>
-            <div class="nav-links">
-                <a href="dashboard.php">Home</a>
-                <a href="assignments.php" class="active">Assignments</a>
-                <a href="agents.php">Agents</a>
-                <a href="management.php">Management</a>
-                <a href="store_data.php">Store Data</a>
-                <a href="bank_approvals.php">Bank Approvals</a>
-                <a href="../logout.php" class="logout-btn">Logout</a>
-            </div>
         </div>
+        <div class="nav-links">
+            <a href="dashboard.php">Home</a>
+            <a href="assignments.php" class="active">Assignments</a>
+            <a href="agents.php">Agents</a>
+            <a href="management.php">Management</a>
+            <a href="store_data.php">Store Data</a>
+            <a href="bank_approvals.php">Bank Approvals</a>
+            <a href="../logout.php" class="logout-btn">Logout</a>
+        </div>
+    </div>
         
         <div class="content">
             <?php if (isset($success_message)): ?>
                 <div class="alert alert-success"><?php echo htmlspecialchars($success_message); ?></div>
+            <?php endif; ?>
+            
+            <?php if (isset($warning_message)): ?>
+                <div class="alert alert-warning"><?php echo htmlspecialchars($warning_message); ?></div>
             <?php endif; ?>
             
             <?php if (isset($error_message)): ?>

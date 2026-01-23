@@ -78,7 +78,10 @@ $agents = $agents_stmt->fetchAll(PDO::FETCH_ASSOC);
 <body>
     <div class="container">
         <div class="header">
-            <h1>Agents</h1>
+            <div class="logo-container">
+                <img src="../images/logo.svg" alt="Apparels Collection Logo" />
+                <h1>Agents</h1>
+            </div>
             <div class="nav-links">
                 <a href="dashboard.php">Home</a>
                 <a href="assignments.php">Assignments</a>

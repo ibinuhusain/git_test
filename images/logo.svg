@@ -1,0 +1,18 @@
+<svg width="200" height="50" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background rectangle with gradient -->
+  <defs>
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#0F2F84ff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#04257Eff;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Main background -->
+  <rect width="200" height="50" fill="url(#logoGradient)" rx="5"/>
+  
+  <!-- Text -->
+  <text x="10" y="32" font-family="Arial, sans-serif" font-size="20" fill="#FAFCFAff" font-weight="bold">Apparels Collection</text>
+  
+  <!-- Decorative element -->
+  <circle cx="180" cy="15" r="8" fill="#BCC6CBff" opacity="0.8"/>
+</svg>

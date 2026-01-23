@@ -140,18 +140,21 @@ $completed_orders = $stmt->fetchColumn() ?: 0;
 </head>
 <body>
     <div class="container">
-        <div class="header">
+    <div class="header">
+        <div class="logo-container">
+            <img src="../images/logo.svg" alt="Apparels Collection Logo" />
             <h1>Admin Dashboard</h1>
-            <div class="nav-links">
-                <a href="dashboard.php" class="active">Home</a>
-                <a href="assignments.php">Assignments</a>
-                <a href="agents.php">Agents</a>
-                <a href="management.php">Management</a>
-                <a href="store_data.php">Store Data</a>
-                <a href="bank_approvals.php">Bank Approvals</a>
-                <a href="../logout.php" class="logout-btn">Logout</a>
-            </div>
         </div>
+        <div class="nav-links">
+            <a href="dashboard.php" class="active">Home</a>
+            <a href="assignments.php">Assignments</a>
+            <a href="agents.php">Agents</a>
+            <a href="management.php">Management</a>
+            <a href="store_data.php">Store Data</a>
+            <a href="bank_approvals.php">Bank Approvals</a>
+            <a href="../logout.php" class="logout-btn">Logout</a>
+        </div>
+    </div>
         
         <div class="content">
             <h2>System Overview</h2>
