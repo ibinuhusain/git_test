@@ -82,7 +82,7 @@ $remaining_assignments = $total_assignments - $completed_count;
             </div>
             <div class="nav-links">
                 <a href="dashboard.php" class="active">Dashboard</a>
-                <a href="store.php">Store</a>
+                <a href="my_stores.php">My Stores</a>
                 <a href="submissions.php">Submissions</a>
                 <a href="../logout.php" class="logout-btn">Logout</a>
             </div>

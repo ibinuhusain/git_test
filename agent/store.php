@@ -151,7 +151,7 @@ $receipt_images = $collection ? json_decode($collection['receipt_images'], true)
             </div>
             <div class="nav-links">
                 <a href="dashboard.php">Dashboard</a>
-                <a href="store.php" class="active">Store</a>
+                <a href="my_stores.php">My Stores</a>
                 <a href="submissions.php">Submissions</a>
                 <a href="../logout.php" class="logout-btn">Logout</a>
             </div>
@@ -166,7 +166,68 @@ $receipt_images = $collection ? json_decode($collection['receipt_images'], true)
                 <div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div>
             <?php endif; ?>
             
-            <h2>Store Information</h2>
+            <!-- Table of all assigned stores -->
+            <h2>All Assigned Stores</h2>
+            <div class="table-container">
+                <table class="store-table">
+                    <thead>
+                        <tr>
+                            <th>Store ID</th>
+                            <th>Store Name</th>
+                            <th>Address</th>
+                            <th>City</th>
+                            <th>State</th>
+                            <th>Date Assigned</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        $stmt = $pdo->prepare("
+                            SELECT da.*, s.name as store_name, s.address as store_address, s.city, s.state, s.store_id as store_unique_id
+                            FROM daily_assignments da
+                            JOIN stores s ON da.store_id = s.id
+                            WHERE da.agent_id = ?
+                            ORDER BY da.created_at DESC
+                        ");
+                        $stmt->execute([$agent_id]);
+                        $assigned_stores = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                        
+                        foreach ($assigned_stores as $store):
+                        ?>
+                        <tr>
+                            <td><?php echo htmlspecialchars($store['store_unique_id']); ?></td>
+                            <td><?php echo htmlspecialchars($store['store_name']); ?></td>
+                            <td><?php echo htmlspecialchars($store['store_address']); ?></td>
+                            <td><?php echo htmlspecialchars($store['city'] ?? 'N/A'); ?></td>
+                            <td><?php echo htmlspecialchars($store['state'] ?? 'N/A'); ?></td>
+                            <td><?php echo date('Y-m-d', strtotime($store['created_at'])); ?></td>
+                            <td>
+                                <span class="status-badge <?php echo $store['status']; ?>">
+                                    <?php echo ucfirst($store['status']); ?>
+                                </span>
+                            </td>
+                            <td>
+                                <?php if ($store['id'] == $assignment_id): ?>
+                                    <span class="current-assignment">Current</span>
+                                <?php else: ?>
+                                    <a href="store.php?assignment_id=<?php echo $store['id']; ?>" class="btn btn-small">Manage</a>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                        
+                        <?php if (empty($assigned_stores)): ?>
+                        <tr>
+                            <td colspan="8">No stores assigned to you yet.</td>
+                        </tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+            
+            <h2>Store Information (Current Assignment)</h2>
             <div class="card">
                 <p><strong>Store Name:</strong> <?php echo htmlspecialchars($assignment['store_name']); ?></p>
                 <p><strong>Region:</strong> <?php 
