@@ -77,6 +77,11 @@ $remaining_assignments = $total_assignments - $completed_count;
     <div class="container">
         <div class="header">
             <h1>Welcome, <?php echo htmlspecialchars($_SESSION['name']); ?></h1>
+            <div class="hamburger">
+                <div class="hamburger-line"></div>
+                <div class="hamburger-line"></div>
+                <div class="hamburger-line"></div>
+            </div>
             <div class="nav-links">
                 <a href="dashboard.php" class="active">Dashboard</a>
                 <a href="store.php">Store</a>

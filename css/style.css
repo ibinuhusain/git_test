@@ -222,17 +222,75 @@ tr:hover {
     border: 1px solid #ddd;
 }
 
-/* Responsive design */
+/* Hamburger menu styles */
+.hamburger {
+    display: none;
+    flex-direction: column;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.hamburger-line {
+    width: 25px;
+    height: 3px;
+    background-color: white;
+    margin: 3px 0;
+    transition: 0.3s;
+}
+
+/* Animated hamburger lines */
+.hamburger-line-open-top {
+    transform: rotate(-45deg) translate(-5px, 6px);
+}
+
+.hamburger-line-open-middle {
+    opacity: 0;
+}
+
+.hamburger-line-open-bottom {
+    transform: rotate(45deg) translate(-5px, -6px);
+}
+
 @media (max-width: 768px) {
+    .hamburger {
+        display: flex;
+    }
+    
     .nav-links {
+        position: fixed;
+        top: 60px;
+        left: -100%;
+        width: 100%;
+        height: calc(100vh - 60px);
+        background-color: #003459;
         flex-direction: column;
-        gap: 10px;
+        align-items: center;
+        justify-content: flex-start;
+        padding-top: 20px;
+        transition: left 0.3s ease;
+        z-index: 1000;
+    }
+    
+    .nav-links.active {
+        left: 0;
+    }
+    
+    .nav-links a {
+        display: block;
+        margin: 10px 0;
+        width: 90%;
+        text-align: center;
+        padding: 12px;
+        border-radius: 4px;
     }
     
     .header {
-        flex-direction: column;
-        gap: 10px;
-        text-align: center;
+        flex-direction: row;
+        justify-content: space-between;
+    }
+    
+    .header h1 {
+        font-size: 1.2em;
     }
     
     .dashboard-stats {

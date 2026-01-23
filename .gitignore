@@ -1,11 +1,10 @@
-```gitignore
 # Compiled and build artifacts
 *.pyc
 __pycache__/
 
 # Dependencies
-vendor/
 node_modules/
+vendor/
 
 # Logs and temp files
 *.log
@@ -25,11 +24,12 @@ node_modules/
 .DS_Store
 Thumbs.db
 
-# Build and distribution
+# Coverage reports
+coverage/
+htmlcov/
+.coverage
+
+# Distribution / packaging
 dist/
 build/
-target/
-*.o
-*.obj
-*.out
-```
+*.egg-info/

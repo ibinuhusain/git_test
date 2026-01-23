@@ -109,6 +109,11 @@ $submission_history = $history_stmt->fetchAll(PDO::FETCH_ASSOC);
     <div class="container">
         <div class="header">
             <h1>Bank Submissions</h1>
+            <div class="hamburger">
+                <div class="hamburger-line"></div>
+                <div class="hamburger-line"></div>
+                <div class="hamburger-line"></div>
+            </div>
             <div class="nav-links">
                 <a href="dashboard.php">Dashboard</a>
                 <a href="store.php">Store</a>

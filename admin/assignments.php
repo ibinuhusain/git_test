@@ -205,6 +205,11 @@ $today_assignments = $assignments_stmt->fetchAll(PDO::FETCH_ASSOC);
     <div class="container">
         <div class="header">
             <h1>Assignments</h1>
+            <div class="hamburger">
+                <div class="hamburger-line"></div>
+                <div class="hamburger-line"></div>
+                <div class="hamburger-line"></div>
+            </div>
             <div class="nav-links">
                 <a href="dashboard.php">Home</a>
                 <a href="assignments.php" class="active">Assignments</a>
