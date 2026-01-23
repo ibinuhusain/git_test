@@ -1,35 +1,42 @@
-```gitignore
-# Compiled and build artifacts
-*.pyc
-__pycache__/
+```
+# Backup files
+*.backup
 
-# Dependencies
-vendor/
-node_modules/
+# Environment
+.env
+.env.local
+.env.*
 
 # Logs and temp files
 *.log
 *.tmp
 *.swp
 
-# Environment
-.env
-.env.local
-*.env.*
-
 # Editors
 .vscode/
 .idea/
 
-# OS generated files
-.DS_Store
-Thumbs.db
+# Dependencies
+node_modules/
+vendor/
+composer.lock
 
-# Build and distribution
+# Build artifacts
 dist/
 build/
-target/
-*.o
-*.obj
-*.out
+*.phar
+*.so
+*.dll
+*.exe
+
+# Cache
+.cache/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# OS
+.DS_Store
+Thumbs.db
 ```

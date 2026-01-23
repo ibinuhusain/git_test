@@ -20,7 +20,7 @@ if (!$assignment_id) {
 
 // Verify that this assignment belongs to the current agent
 $stmt = $pdo->prepare("
-    SELECT da.*, s.name as store_name, s.address as store_address, u.name as agent_name
+    SELECT da.*, s.name as store_name, s.address as store_address, s.city, u.name as agent_name
     FROM daily_assignments da
     JOIN stores s ON da.store_id = s.id
     JOIN users u ON da.agent_id = u.id
@@ -166,12 +166,13 @@ $receipt_images = $collection ? json_decode($collection['receipt_images'], true)
             <h2>Store Information</h2>
             <div class="card">
                 <p><strong>Store Name:</strong> <?php echo htmlspecialchars($assignment['store_name']); ?></p>
-                <p><strong>Region:</strong> <?php 
+                <p><strong>City:</strong> <?php 
                     $store_details = $pdo->prepare("SELECT * FROM stores WHERE id = ?");
                     $store_details->execute([$assignment['store_id']]);
                     $store_info = $store_details->fetch(PDO::FETCH_ASSOC);
-                    echo htmlspecialchars($store_info['region_name'] ?? 'N/A'); 
+                    echo htmlspecialchars($store_info['city'] ?? 'N/A'); 
                 ?></p>
+                <p><strong>Region:</strong> <?php echo htmlspecialchars($store_info['region_name'] ?? 'N/A'); ?></p>
                 <p><strong>Mall:</strong> <?php echo htmlspecialchars($store_info['mall'] ?? 'N/A'); ?></p>
                 <p><strong>Entity:</strong> <?php echo htmlspecialchars($store_info['entity'] ?? 'N/A'); ?></p>
                 <p><strong>Brand:</strong> <?php echo htmlspecialchars($store_info['brand'] ?? 'N/A'); ?></p>

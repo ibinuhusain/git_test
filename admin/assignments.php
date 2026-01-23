@@ -48,6 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['import_excel'])) {
                             $mall = trim($row[2] ?? '');
                             $entity = trim($row[3] ?? '');
                             $brand = trim($row[4] ?? '');
+                            $city = trim($row[5] ?? '');
                             
                             // Find agent by name
                             $agentStmt = $pdo->prepare("SELECT id FROM users WHERE name = ? AND role = 'agent'");
@@ -174,13 +175,13 @@ $agents_stmt = $pdo->query("SELECT id, name, username FROM users WHERE role = 'a
 $agents = $agents_stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Get all stores
-$stores_stmt = $pdo->query("SELECT s.id, s.name, s.mall, s.entity, s.brand, r.name as region_name FROM stores s LEFT JOIN regions r ON s.region_id = r.id");
+$stores_stmt = $pdo->query("SELECT s.id, s.name, s.mall, s.entity, s.brand, s.city, r.name as region_name FROM stores s LEFT JOIN regions r ON s.region_id = r.id");
 $stores = $stores_stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Get today's assignments
 $today = date('Y-m-d');
 $assignments_stmt = $pdo->prepare("
-    SELECT da.*, u.name as agent_name, s.name as store_name, r.name as region_name
+    SELECT da.*, u.name as agent_name, s.name as store_name, s.city, r.name as region_name
     FROM daily_assignments da
     JOIN users u ON da.agent_id = u.id
     JOIN stores s ON da.store_id = s.id
@@ -251,6 +252,7 @@ $today_assignments = $assignments_stmt->fetchAll(PDO::FETCH_ASSOC);
                             <tr>
                                 <th>Select</th>
                                 <th>Region</th>
+                                <th>City</th>
                                 <th>Mall</th>
                                 <th>Entity</th>
                                 <th>Brand</th>
@@ -261,6 +263,7 @@ $today_assignments = $assignments_stmt->fetchAll(PDO::FETCH_ASSOC);
                                 <tr>
                                     <td><input type="checkbox" id="store_<?php echo $store['id']; ?>" name="stores[]" value="<?php echo $store['id']; ?>"></td>
                                     <td><?php echo htmlspecialchars($store['region_name'] ?? 'N/A'); ?></td>
+                                    <td><?php echo htmlspecialchars($store['city'] ?? 'N/A'); ?></td>
                                     <td><?php echo htmlspecialchars($store['mall'] ?? 'N/A'); ?></td>
                                     <td><?php echo htmlspecialchars($store['entity'] ?? 'N/A'); ?></td>
                                     <td><?php echo htmlspecialchars($store['brand'] ?? 'N/A'); ?></td>
@@ -282,7 +285,7 @@ $today_assignments = $assignments_stmt->fetchAll(PDO::FETCH_ASSOC);
                 <div class="form-group">
                     <label for="excel_file">Upload Excel File:</label>
                     <input type="file" id="excel_file" name="excel_file" accept=".xlsx,.xls,.csv" required>
-                    <small>Excel file should have columns: Agent_Name, Region, Mall, Entity, Brand</small>
+                    <small>Excel file should have columns: Agent_Name, Region, Mall, Entity, Brand, City</small>
                 </div>
                 
                 <button type="submit" class="btn">Import from Excel</button>
@@ -298,6 +301,7 @@ $today_assignments = $assignments_stmt->fetchAll(PDO::FETCH_ASSOC);
                             <th>Agent</th>
                             <th>Store</th>
                             <th>Region</th>
+                            <th>City</th>
                             <th>Mall</th>
                             <th>Entity</th>
                             <th>Brand</th>
@@ -310,6 +314,7 @@ $today_assignments = $assignments_stmt->fetchAll(PDO::FETCH_ASSOC);
                                 <td><?php echo htmlspecialchars($assignment['agent_name']); ?></td>
                                 <td><?php echo htmlspecialchars($assignment['store_name']); ?></td>
                                 <td><?php echo htmlspecialchars($assignment['region_name'] ?? 'N/A'); ?></td>
+                                <td><?php echo htmlspecialchars($assignment['city'] ?? 'N/A'); ?></td>
                                 <td><?php echo htmlspecialchars($assignment['mall'] ?? 'N/A'); ?></td>
                                 <td><?php echo htmlspecialchars($assignment['entity'] ?? 'N/A'); ?></td>
                                 <td><?php echo htmlspecialchars($assignment['brand'] ?? 'N/A'); ?></td>
