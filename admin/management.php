@@ -53,12 +53,18 @@ $users = $users_stmt->fetchAll(PDO::FETCH_ASSOC);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Management - Apparels Collection</title>
     <link rel="stylesheet" href="../css/style.css">
+    <script src="../js/app.js"></script>
     <link rel="manifest" href="../manifest.json">
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>Management</h1>
+            <div class="hamburger">
+                <div class="hamburger-line"></div>
+                <div class="hamburger-line"></div>
+                <div class="hamburger-line"></div>
+            </div>
             <div class="nav-links">
                 <a href="dashboard.php">Home</a>
                 <a href="assignments.php">Assignments</a>

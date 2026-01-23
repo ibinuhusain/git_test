@@ -123,6 +123,7 @@ $completed_orders = $stmt->fetchColumn() ?: 0;
     <title>Admin Dashboard - Apparels Collection</title>
     <link rel="stylesheet" href="../css/style.css">
     <link rel="manifest" href="../manifest.json">
+    <script src="../js/app.js"></script>
     <script>
         // Register service worker for PWA functionality
         if ('serviceWorker' in navigator) {
@@ -142,6 +143,11 @@ $completed_orders = $stmt->fetchColumn() ?: 0;
     <div class="container">
         <div class="header">
             <h1>Admin Dashboard</h1>
+            <div class="hamburger">
+                <div class="hamburger-line"></div>
+                <div class="hamburger-line"></div>
+                <div class="hamburger-line"></div>
+            </div>
             <div class="nav-links">
                 <a href="dashboard.php" class="active">Home</a>
                 <a href="assignments.php">Assignments</a>

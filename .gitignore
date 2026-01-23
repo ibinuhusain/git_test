@@ -4,8 +4,9 @@
 __pycache__/
 
 # Dependencies
-vendor/
 node_modules/
+vendor/
+composer.lock
 
 # Logs and temp files
 *.log
@@ -25,11 +26,22 @@ node_modules/
 .DS_Store
 Thumbs.db
 
-# Build and distribution
+# Backup files
+*~
+*.bak
+*.backup
+
+# Distribution / packaging
 dist/
 build/
-target/
-*.o
-*.obj
-*.out
+*.tar.gz
+*.zip
+
+# PHP specific
+*.php~
+.htaccess
+
+# JavaScript/CSS build artifacts
+*.min.js
+*.min.css
 ```

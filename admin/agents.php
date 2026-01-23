@@ -74,11 +74,17 @@ $agents = $agents_stmt->fetchAll(PDO::FETCH_ASSOC);
     <title>Agents - Apparels Collection</title>
     <link rel="stylesheet" href="../css/style.css">
     <link rel="manifest" href="../manifest.json">
+    <script src="../js/app.js"></script>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>Agents</h1>
+            <div class="hamburger">
+                <div class="hamburger-line"></div>
+                <div class="hamburger-line"></div>
+                <div class="hamburger-line"></div>
+            </div>
             <div class="nav-links">
                 <a href="dashboard.php">Home</a>
                 <a href="assignments.php">Assignments</a>
