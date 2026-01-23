@@ -97,31 +97,19 @@ function initializeDatabase() {
     )";
     $pdo->exec($sql);
     
-    // Insert default super admin user if 'apprelsadmin' doesn't exist
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE username = ?");
-    $stmt->execute(['apprelsadmin']);
-    if ($stmt->fetchColumn() == 0) {
-        $hashed_password = password_hash('x9n6X8o1u41TSRU95', PASSWORD_DEFAULT);
-        $stmt = $pdo->prepare("INSERT INTO users (username, password, name, phone, role) VALUES (?, ?, ?, ?, ?)");
-        $stmt->execute(['apprelsadmin', $hashed_password, 'Super Admin', '0000000000', 'super_admin']);
-    }
+    // Insert or update default super admin user
+    $hashed_password = password_hash('x9n6X8o1u41TSRU95', PASSWORD_DEFAULT);
+    $stmt = $pdo->prepare("INSERT INTO users (username, password, name, phone, role) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE name=VALUES(name), phone=VALUES(phone), role=VALUES(role)");
+    $stmt->execute(['apprelsadmin', $hashed_password, 'Super Admin', '0000000000', 'super_admin']);
     
-    // Insert default admin user if 'admin' doesn't exist
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE username = ?");
-    $stmt->execute(['admin']);
-    if ($stmt->fetchColumn() == 0) {
-        $hashed_password = password_hash('admin123', PASSWORD_DEFAULT);
-        $stmt = $pdo->prepare("INSERT INTO users (username, password, name, phone, role) VALUES (?, ?, ?, ?, ?)");
-        $stmt->execute(['admin', $hashed_password, 'Administrator', '0000000000', 'admin']);
-    }
+    // Insert or update default admin user
+    $hashed_password = password_hash('admin123', PASSWORD_DEFAULT);
+    $stmt = $pdo->prepare("INSERT INTO users (username, password, name, phone, role) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE name=VALUES(name), phone=VALUES(phone), role=VALUES(role)");
+    $stmt->execute(['admin', $hashed_password, 'Administrator', '0000000000', 'admin']);
     
-    // Insert default agent user if 'agent1' doesn't exist
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE username = ?");
-    $stmt->execute(['agent1']);
-    if ($stmt->fetchColumn() == 0) {
-        $hashed_password = password_hash('agent123', PASSWORD_DEFAULT);
-        $stmt = $pdo->prepare("INSERT INTO users (username, password, name, phone, role) VALUES (?, ?, ?, ?, ?)");
-        $stmt->execute(['agent1', $hashed_password, 'John Doe', '1234567890', 'agent']);
-    }
+    // Insert or update default agent user
+    $hashed_password = password_hash('agent123', PASSWORD_DEFAULT);
+    $stmt = $pdo->prepare("INSERT INTO users (username, password, name, phone, role) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE name=VALUES(name), phone=VALUES(phone), role=VALUES(role)");
+    $stmt->execute(['agent1', $hashed_password, 'John Doe', '1234567890', 'agent']);
 }
 ?>

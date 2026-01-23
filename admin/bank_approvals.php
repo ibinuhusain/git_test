@@ -173,17 +173,17 @@ $agents = $agents_stmt->fetchAll(PDO::FETCH_ASSOC);
                                         </div>
                                     </td>
                                     <td>
-                                        <form method="post" style="display: inline-block;" onsubmit="return confirm('Are you sure you want to approve this submission?');">
+                                        <form method="post" class="approval-form" style="display: inline-block;">
                                             <input type="hidden" name="submission_id" value="<?php echo $submission['id']; ?>">
                                             <input type="hidden" name="status" value="approved">
                                             <input type="hidden" name="approve_reject_submission" value="1">
-                                            <button type="submit" class="btn btn-success">Approve</button>
+                                            <button type="submit" class="btn btn-success" data-action="approve">Approve</button>
                                         </form>
-                                        <form method="post" style="display: inline-block;" onsubmit="return confirm('Are you sure you want to reject this submission?');">
+                                        <form method="post" class="approval-form" style="display: inline-block;">
                                             <input type="hidden" name="submission_id" value="<?php echo $submission['id']; ?>">
                                             <input type="hidden" name="status" value="rejected">
                                             <input type="hidden" name="approve_reject_submission" value="1">
-                                            <button type="submit" class="btn btn-danger">Reject</button>
+                                            <button type="submit" class="btn btn-danger" data-action="reject">Reject</button>
                                         </form>
                                     </td>
                                 </tr>
@@ -360,5 +360,57 @@ $agents = $agents_stmt->fetchAll(PDO::FETCH_ASSOC);
             }
         }
     </style>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const approvalForms = document.querySelectorAll('.approval-form');
+            
+            approvalForms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const button = this.querySelector('button[type="submit"]');
+                    const action = button.getAttribute('data-action');
+                    
+                    // Confirmation dialog
+                    const confirmMessage = action === 'approve' ? 
+                        'Are you sure you want to approve this submission?' : 
+                        'Are you sure you want to reject this submission?';
+                    
+                    if (!confirm(confirmMessage)) {
+                        return;
+                    }
+                    
+                    // Disable button to prevent multiple submissions
+                    button.disabled = true;
+                    button.textContent = action.charAt(0).toUpperCase() + action.slice(1) + 'ing...';
+                    
+                    // Submit the form via fetch API
+                    fetch('', {
+                        method: 'POST',
+                        body: new FormData(this),
+                        headers: {
+                            'Accept': 'text/html'
+                        }
+                    })
+                    .then(response => response.text())
+                    .then(data => {
+                        // Reload the page to reflect changes
+                        location.reload();
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        
+                        // Re-enable button
+                        button.disabled = false;
+                        button.textContent = action.charAt(0).toUpperCase() + action.slice(1);
+                        
+                        // Show error message
+                        alert('An error occurred while processing your request. Please contact the support team.');
+                    });
+                });
+            });
+        });
+    </script>
 </body>
 </html>

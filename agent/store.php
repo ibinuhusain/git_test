@@ -145,7 +145,10 @@ $receipt_images = $collection ? json_decode($collection['receipt_images'], true)
 <body>
     <div class="container">
         <div class="header">
-            <h1>Store Collection</h1>
+            <div class="logo-container">
+                <img src="../images/logo.svg" alt="Apparels Collection Logo" />
+                <h1>Store Collection</h1>
+            </div>
             <div class="nav-links">
                 <a href="dashboard.php">Dashboard</a>
                 <a href="store.php" class="active">Store</a>
