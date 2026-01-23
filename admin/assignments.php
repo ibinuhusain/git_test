@@ -10,12 +10,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['assign_shops'])) {
     $selected_stores = $_POST['stores'];
     $assignment_date = $_POST['assignment_date'] ?? date('Y-m-d');
     
+    $assigned_count = 0;
+    $duplicate_count = 0;
+    $already_assigned_count = 0;
+    
     foreach ($selected_stores as $store_id) {
-        $stmt = $pdo->prepare("INSERT INTO daily_assignments (agent_id, store_id, date_assigned) VALUES (?, ?, ?)");
-        $stmt->execute([$agent_id, $store_id, $assignment_date]);
+        // Check if this agent is already assigned to this store on the same date
+        $check_stmt = $pdo->prepare("SELECT id FROM daily_assignments WHERE agent_id = ? AND store_id = ? AND date_assigned = ?");
+        $check_stmt->execute([$agent_id, $store_id, $assignment_date]);
+        
+        if ($check_stmt->rowCount() == 0) {
+            // Check if this store is already assigned to another agent on the same date
+            $check_store_stmt = $pdo->prepare("SELECT id, agent_id FROM daily_assignments WHERE store_id = ? AND date_assigned = ?");
+            $check_store_stmt->execute([$store_id, $assignment_date]);
+            $existing_assignment = $check_store_stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if ($existing_assignment) {
+                // Store is already assigned to another agent
+                $already_assigned_count++;
+            } else {
+                // Only assign if not already assigned to any agent
+                $stmt = $pdo->prepare("INSERT INTO daily_assignments (agent_id, store_id, date_assigned) VALUES (?, ?, ?)");
+                $stmt->execute([$agent_id, $store_id, $assignment_date]);
+                $assigned_count++;
+            }
+        } else {
+            $duplicate_count++;
+        }
     }
     
-    $success_message = "Shops assigned successfully!";
+    if ($assigned_count > 0 && ($duplicate_count > 0 || $already_assigned_count > 0)) {
+        $message = "Successfully assigned $assigned_count store(s). ";
+        if ($duplicate_count > 0) {
+            $message .= "$duplicate_count duplicate assignment(s) skipped. ";
+        }
+        if ($already_assigned_count > 0) {
+            $message .= "$already_assigned_count store(s) already assigned to other agents.";
+        }
+        $success_message = $message;
+    } elseif ($assigned_count > 0) {
+        $success_message = "Successfully assigned $assigned_count store(s).";
+    } else {
+        $warning_message = "No new stores were assigned. ";
+        if ($duplicate_count > 0) {
+            $warning_message .= "$duplicate_count duplicate assignment(s). ";
+        }
+        if ($already_assigned_count > 0) {
+            $warning_message .= "$already_assigned_count store(s) already assigned to other agents. ";
+        }
+    }
 }
 
 // Handle Excel import
@@ -69,12 +112,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['import_excel'])) {
                                     $stores = $storeStmt->fetchAll(PDO::FETCH_ASSOC);
                                     
                                     foreach ($stores as $store) {
-                                        // Create assignment
-                                        $assignmentStmt = $pdo->prepare("INSERT INTO daily_assignments (agent_id, store_id, date_assigned, status) VALUES (?, ?, ?, 'pending')");
-                                        $assignmentStmt->execute([$agent['id'], $store['id'], date('Y-m-d')]);
+                                        // Check if store is already assigned to another agent today
+                                        $check_store_stmt = $pdo->prepare("SELECT id FROM daily_assignments WHERE store_id = ? AND date_assigned = ?");
+                                        $check_store_stmt->execute([$store['id'], date('Y-m-d')]);
+                                        
+                                        if ($check_store_stmt->rowCount() == 0) {
+                                            // Create assignment only if not already assigned to any agent today
+                                            $assignmentStmt = $pdo->prepare("INSERT INTO daily_assignments (agent_id, store_id, date_assigned, status) VALUES (?, ?, ?, 'pending')");
+                                            $assignmentStmt->execute([$agent['id'], $store['id'], date('Y-m-d')]);
+                                            $importedCount++;
+                                        }
                                     }
-                                    
-                                    $importedCount++;
                                 } else {
                                     // If region doesn't exist, create it
                                     $createRegionStmt = $pdo->prepare("INSERT INTO regions (name) VALUES (?)");
@@ -87,12 +135,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['import_excel'])) {
                                     $stores = $storeStmt->fetchAll(PDO::FETCH_ASSOC);
                                     
                                     foreach ($stores as $store) {
-                                        // Create assignment
-                                        $assignmentStmt = $pdo->prepare("INSERT INTO daily_assignments (agent_id, store_id, date_assigned, status) VALUES (?, ?, ?, 'pending')");
-                                        $assignmentStmt->execute([$agent['id'], $store['id'], date('Y-m-d')]);
+                                        // Check if store is already assigned to another agent today
+                                        $check_store_stmt = $pdo->prepare("SELECT id FROM daily_assignments WHERE store_id = ? AND date_assigned = ?");
+                                        $check_store_stmt->execute([$store['id'], date('Y-m-d')]);
+                                        
+                                        if ($check_store_stmt->rowCount() == 0) {
+                                            // Create assignment only if not already assigned to any agent today
+                                            $assignmentStmt = $pdo->prepare("INSERT INTO daily_assignments (agent_id, store_id, date_assigned, status) VALUES (?, ?, ?, 'pending')");
+                                            $assignmentStmt->execute([$agent['id'], $store['id'], date('Y-m-d')]);
+                                            $importedCount++;
+                                        }
                                     }
-                                    
-                                    $importedCount++;
                                 }
                             } else {
                                 $error_message = "Agent '$agent_name' does not exist.";
@@ -142,10 +195,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['import_excel'])) {
                                 if ($store) {
                                     $store_id = $store['id'];
                                     
-                                    // Create assignment
-                                    $assignment_stmt = $pdo->prepare("INSERT INTO daily_assignments (agent_id, store_id, date_assigned) VALUES (?, ?, ?)");
-                                    $assignment_stmt->execute([$agent_id, $store_id, date('Y-m-d')]);
-                                    $added_count++;
+                                    // Check if store is already assigned to another agent today
+                                    $check_store_stmt = $pdo->prepare("SELECT id FROM daily_assignments WHERE store_id = ? AND date_assigned = ?");
+                                    $check_store_stmt->execute([$store_id, date('Y-m-d')]);
+                                    
+                                    if ($check_store_stmt->rowCount() == 0) {
+                                        // Create assignment only if not already assigned to any agent today
+                                        $assignment_stmt = $pdo->prepare("INSERT INTO daily_assignments (agent_id, store_id, date_assigned) VALUES (?, ?, ?)");
+                                        $assignment_stmt->execute([$agent_id, $store_id, date('Y-m-d')]);
+                                        $added_count++;
+                                    }
                                 }
                             }
                         }
@@ -203,22 +262,29 @@ $today_assignments = $assignments_stmt->fetchAll(PDO::FETCH_ASSOC);
 </head>
 <body>
     <div class="container">
-        <div class="header">
+    <div class="header">
+        <div class="logo-container">
+            <img src="../images/logo.svg" alt="Apparels Collection Logo" />
             <h1>Assignments</h1>
-            <div class="nav-links">
-                <a href="dashboard.php">Home</a>
-                <a href="assignments.php" class="active">Assignments</a>
-                <a href="agents.php">Agents</a>
-                <a href="management.php">Management</a>
-                <a href="store_data.php">Store Data</a>
-                <a href="bank_approvals.php">Bank Approvals</a>
-                <a href="../logout.php" class="logout-btn">Logout</a>
-            </div>
         </div>
+        <div class="nav-links">
+            <a href="dashboard.php">Home</a>
+            <a href="assignments.php" class="active">Assignments</a>
+            <a href="agents.php">Agents</a>
+            <a href="management.php">Management</a>
+            <a href="store_data.php">Store Data</a>
+            <a href="bank_approvals.php">Bank Approvals</a>
+            <a href="../logout.php" class="logout-btn">Logout</a>
+        </div>
+    </div>
         
         <div class="content">
             <?php if (isset($success_message)): ?>
                 <div class="alert alert-success"><?php echo htmlspecialchars($success_message); ?></div>
+            <?php endif; ?>
+            
+            <?php if (isset($warning_message)): ?>
+                <div class="alert alert-warning"><?php echo htmlspecialchars($warning_message); ?></div>
             <?php endif; ?>
             
             <?php if (isset($error_message)): ?>

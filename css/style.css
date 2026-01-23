@@ -1,9 +1,37 @@
+/* Color Palette Variables */
+:root {
+    /* CSS HEX */
+    --true-cobalt: #0F2F84ff;
+    --true-cobalt-2: #04257Eff;
+    --porcelain: #FAFCFAff;
+    --imperial-blue: #072676ff;
+    --pale-slate: #BCC6CBff;
+
+    /* CSS HSL */
+    --true-cobalt-hsl: hsla(224, 80%, 29%, 1);
+    --true-cobalt-2-hsl: hsla(224, 94%, 25%, 1);
+    --porcelain-hsl: hsla(120, 25%, 98%, 1);
+    --imperial-blue-hsl: hsla(223, 89%, 25%, 1);
+    --pale-slate-hsl: hsla(200, 13%, 77%, 1);
+
+    /* SCSS Gradient */
+    --gradient-top: linear-gradient(0deg, #0F2F84ff, #04257Eff, #FAFCFAff, #072676ff, #BCC6CBff);
+    --gradient-right: linear-gradient(90deg, #0F2F84ff, #04257Eff, #FAFCFAff, #072676ff, #BCC6CBff);
+    --gradient-bottom: linear-gradient(180deg, #0F2F84ff, #04257Eff, #FAFCFAff, #072676ff, #BCC6CBff);
+    --gradient-left: linear-gradient(270deg, #0F2F84ff, #04257Eff, #FAFCFAff, #072676ff, #BCC6CBff);
+    --gradient-top-right: linear-gradient(45deg, #0F2F84ff, #04257Eff, #FAFCFAff, #072676ff, #BCC6CBff);
+    --gradient-bottom-right: linear-gradient(135deg, #0F2F84ff, #04257Eff, #FAFCFAff, #072676ff, #BCC6CBff);
+    --gradient-top-left: linear-gradient(225deg, #0F2F84ff, #04257Eff, #FAFCFAff, #072676ff, #BCC6CBff);
+    --gradient-bottom-left: linear-gradient(315deg, #0F2F84ff, #04257Eff, #FAFCFAff, #072676ff, #BCC6CBff);
+    --gradient-radial: radial-gradient(#0F2F84ff, #04257Eff, #FAFCFAff, #072676ff, #BCC6CBff);
+}
+
 /* General styles */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f5f5f5;
+    background-color: var(--porcelain);
 }
 
 .container {
@@ -13,12 +41,24 @@ body {
 }
 
 .header {
-    background-color: #003459;
+    background: var(--gradient-top-right);
+    background-color: var(--imperial-blue);
     color: white;
     padding: 15px 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo-container img {
+    height: 40px;
+    width: auto;
 }
 
 .nav-links {
@@ -154,6 +194,81 @@ tr:hover {
     background-color: #f0f8ff;
 }
 
+.table-container {
+    overflow-x: auto;
+    margin: 20px 0;
+}
+
+.store-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.store-table th,
+.store-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.store-table th {
+    background-color: var(--imperial-blue);
+    color: white;
+    font-weight: bold;
+    position: sticky;
+    top: 0;
+}
+
+.store-table tr:hover {
+    background-color: #f5f5f5;
+}
+
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.85em;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.status-badge.pending {
+    background-color: #f39c12;
+    color: white;
+}
+
+.status-badge.completed {
+    background-color: #2ecc71;
+    color: white;
+}
+
+.status-badge.approved {
+    background-color: #3498db;
+    color: white;
+}
+
+.current-assignment {
+    padding: 4px 8px;
+    background-color: #3498db;
+    color: white;
+    border-radius: 4px;
+    font-size: 0.85em;
+    font-weight: bold;
+}
+
+.btn-small {
+    padding: 6px 12px;
+    font-size: 0.85em;
+    display: inline-block;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
 .alert {
     padding: 15px;
     margin-bottom: 20px;
@@ -171,6 +286,12 @@ tr:hover {
     color: #721c24;
     background-color: #f8d7da;
     border-color: #f5c6cb;
+}
+
+.alert-warning {
+    color: #856404;
+    background-color: #fff3cd;
+    border-color: #ffeaa7;
 }
 
 .card {

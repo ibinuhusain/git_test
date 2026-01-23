@@ -76,10 +76,13 @@ $remaining_assignments = $total_assignments - $completed_count;
 <body>
     <div class="container">
         <div class="header">
-            <h1>Welcome, <?php echo htmlspecialchars($_SESSION['name']); ?></h1>
+            <div class="logo-container">
+                <img src="../images/logo.svg" alt="Apparels Collection Logo" />
+                <h1>Welcome, <?php echo htmlspecialchars($_SESSION['name']); ?></h1>
+            </div>
             <div class="nav-links">
                 <a href="dashboard.php" class="active">Dashboard</a>
-                <a href="store.php">Store</a>
+                <a href="my_stores.php">My Stores</a>
                 <a href="submissions.php">Submissions</a>
                 <a href="../logout.php" class="logout-btn">Logout</a>
             </div>
