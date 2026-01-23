@@ -117,6 +117,7 @@ $remaining_assignments = $total_assignments - $completed_count;
                     <thead>
                         <tr>
                             <th>Store Name</th>
+                            <th>City</th>
                             <th>Region</th>
                             <th>Mall</th>
                             <th>Entity</th>
@@ -145,6 +146,7 @@ $remaining_assignments = $total_assignments - $completed_count;
                             ?>
                             <tr>
                                 <td><?php echo htmlspecialchars($assignment['store_name']); ?></td>
+                                <td><?php echo htmlspecialchars($store['city'] ?? 'N/A'); ?></td>
                                 <td><?php echo htmlspecialchars($store['region_name'] ?? 'N/A'); ?></td>
                                 <td><?php echo htmlspecialchars($store['mall'] ?? 'N/A'); ?></td>
                                 <td><?php echo htmlspecialchars($store['entity'] ?? 'N/A'); ?></td>

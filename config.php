@@ -45,6 +45,7 @@ function initializeDatabase() {
         id INT AUTO_INCREMENT PRIMARY KEY,
         name VARCHAR(100) NOT NULL,
         address TEXT,
+        city VARCHAR(100),
         region_id INT,
         mall VARCHAR(100),
         entity VARCHAR(100),

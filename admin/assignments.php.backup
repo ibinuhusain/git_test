@@ -285,7 +285,7 @@ $today_assignments = $assignments_stmt->fetchAll(PDO::FETCH_ASSOC);
                 <div class="form-group">
                     <label for="excel_file">Upload Excel File:</label>
                     <input type="file" id="excel_file" name="excel_file" accept=".xlsx,.xls,.csv" required>
-                    <small>Excel file should have columns: Agent_Name, Region, Mall, Entity, Brand, City</small>
+                    <small>Excel file should have columns: Agent_Name, Region, Mall, Entity, Brand</small>
                 </div>
                 
                 <button type="submit" class="btn">Import from Excel</button>
