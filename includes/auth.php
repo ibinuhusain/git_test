@@ -42,7 +42,7 @@ function login($username, $password) {
 // Logout function
 function logout() {
     session_destroy();
-    header("Location: ../login.php");
+    header("Location: ./login.php");
     exit();
 }
 
@@ -64,7 +64,7 @@ function isAdminOrHigher() {
 // Redirect if not logged in
 function requireLogin() {
     if (!isLoggedIn()) {
-        header("Location: ../login.php");
+        header("Location: ./login.php");
         exit();
     }
 }
@@ -72,7 +72,7 @@ function requireLogin() {
 // Redirect if not admin
 function requireAdmin() {
     if (!isAdminOrHigher()) {
-        header("Location: ../index.php");
+        header("Location: ./index.php");
         exit();
     }
 }
@@ -80,7 +80,7 @@ function requireAdmin() {
 // Redirect if not super admin
 function requireSuperAdmin() {
     if (!isSuperAdmin()) {
-        header("Location: ../index.php");
+        header("Location: ./index.php");
         exit();
     }
 }

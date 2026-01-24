@@ -1,9 +1,9 @@
 <?php
-require_once '../includes/auth.php';
+require_once __DIR__ . '/../includes/auth.php';
 requireLogin();
 
 if (hasRole('admin')) {
-    header("Location: ../admin/dashboard.php");
+    header("Location: ./admin/dashboard.php");
     exit();
 }
 
