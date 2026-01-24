@@ -3,7 +3,7 @@ require_once '../includes/auth.php';
 requireLogin();
 
 if (hasRole('admin')) {
-    header("Location: ../admin/dashboard.php");
+    header("Location: /admin/dashboard.php");
     exit();
 }
 
@@ -56,13 +56,13 @@ $remaining_assignments = $total_assignments - $completed_count;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agent Dashboard - Apparels Collection</title>
-    <link rel="stylesheet" href="../css/style.css">
-    <link rel="manifest" href="../manifest.json">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="manifest" href="/manifest.json">
     <script>
         // Register service worker for PWA functionality
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
-                navigator.serviceWorker.register('../sw.js')
+                navigator.serviceWorker.register('/sw.js')
                     .then(function(registration) {
                         console.log('ServiceWorker registration successful');
                     })
@@ -81,7 +81,7 @@ $remaining_assignments = $total_assignments - $completed_count;
                 <a href="dashboard.php" class="active">Dashboard</a>
                 <a href="store.php">Store</a>
                 <a href="submissions.php">Submissions</a>
-                <a href="../logout.php" class="logout-btn">Logout</a>
+                <a href="/logout.php" class="logout-btn">Logout</a>
             </div>
         </div>
         

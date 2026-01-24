@@ -1,9 +1,9 @@
 <?php
 // Database configuration
 define('DB_HOST', 'localhost');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-define('DB_NAME', 'collection_tracking');
+define('DB_USER', 'u931324256_adm');
+define('DB_PASS', '@GE3cn093tkl@');
+define('DB_NAME', 'u931324256_collection');
 
 // Connection to database
 function getConnection() {

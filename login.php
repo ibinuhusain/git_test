@@ -3,9 +3,9 @@ require_once 'includes/auth.php';
 
 if (isLoggedIn()) {
     if (hasRole('admin')) {
-        header("Location: admin/dashboard.php");
+        header("Location: /admin/dashboard.php");
     } else {
-        header("Location: agent/dashboard.php");
+        header("Location: /agent/dashboard.php");
     }
     exit();
 }
@@ -20,9 +20,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     } else {
         if (login($username, $password)) {
             if (hasRole('admin')) {
-                header("Location: admin/dashboard.php");
+                header("Location: /admin/dashboard.php");
             } else {
-                header("Location: agent/dashboard.php");
+                header("Location: /agent/dashboard.php");
             }
             exit();
         } else {
