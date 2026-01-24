@@ -3,7 +3,7 @@ require_once '../includes/auth.php';
 requireLogin();
 
 if (hasRole('admin')) {
-    header("Location: ../admin/dashboard.php");
+    header("Location: /admin/dashboard.php");
     exit();
 }
 
@@ -102,8 +102,8 @@ $submission_history = $history_stmt->fetchAll(PDO::FETCH_ASSOC);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bank Submissions - Apparels Collection</title>
-    <link rel="stylesheet" href="../css/style.css">
-    <link rel="manifest" href="../manifest.json">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="manifest" href="/manifest.json">
 </head>
 <body>
     <div class="container">
@@ -113,7 +113,7 @@ $submission_history = $history_stmt->fetchAll(PDO::FETCH_ASSOC);
                 <a href="dashboard.php">Dashboard</a>
                 <a href="store.php">Store</a>
                 <a href="submissions.php" class="active">Submissions</a>
-                <a href="../logout.php" class="logout-btn">Logout</a>
+                <a href="/logout.php" class="logout-btn">Logout</a>
             </div>
         </div>
         
@@ -172,7 +172,7 @@ $submission_history = $history_stmt->fetchAll(PDO::FETCH_ASSOC);
                                 <td><?php echo number_format($submission['total_amount'], 2); ?></td>
                                 <td>
                                     <?php if ($submission['receipt_image']): ?>
-                                        <a href="../uploads/<?php echo htmlspecialchars($submission['receipt_image']); ?>" target="_blank">View Receipt</a>
+                                        <a href="/uploads/<?php echo htmlspecialchars($submission['receipt_image']); ?>" target="_blank">View Receipt</a>
                                     <?php else: ?>
                                         No receipt
                                     <?php endif; ?>

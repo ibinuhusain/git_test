@@ -3,7 +3,7 @@ require_once '../includes/auth.php';
 requireLogin();
 
 if (hasRole('admin')) {
-    header("Location: ../admin/dashboard.php");
+    header("Location: /admin/dashboard.php");
     exit();
 }
 
@@ -139,8 +139,8 @@ $receipt_images = $collection ? json_decode($collection['receipt_images'], true)
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Store Collection - Apparels Collection</title>
-    <link rel="stylesheet" href="../css/style.css">
-    <link rel="manifest" href="../manifest.json">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="manifest" href="/manifest.json">
 </head>
 <body>
     <div class="container">
@@ -150,7 +150,7 @@ $receipt_images = $collection ? json_decode($collection['receipt_images'], true)
                 <a href="dashboard.php">Dashboard</a>
                 <a href="store.php" class="active">Store</a>
                 <a href="submissions.php">Submissions</a>
-                <a href="../logout.php" class="logout-btn">Logout</a>
+                <a href="/logout.php" class="logout-btn">Logout</a>
             </div>
         </div>
         
@@ -212,8 +212,8 @@ $receipt_images = $collection ? json_decode($collection['receipt_images'], true)
                 <h2>Uploaded Receipts</h2>
                 <div class="image-preview">
                     <?php foreach ($receipt_images as $img): ?>
-                        <a href="../uploads/<?php echo htmlspecialchars($img); ?>" target="_blank">
-                            <img src="../uploads/<?php echo htmlspecialchars($img); ?>" alt="Receipt">
+                        <a href="/uploads/<?php echo htmlspecialchars($img); ?>" target="_blank">
+                            <img src="/uploads/<?php echo htmlspecialchars($img); ?>" alt="Receipt">
                         </a>
                     <?php endforeach; ?>
                 </div>

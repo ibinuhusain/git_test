@@ -121,13 +121,13 @@ $completed_orders = $stmt->fetchColumn() ?: 0;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Apparels Collection</title>
-    <link rel="stylesheet" href="../css/style.css">
-    <link rel="manifest" href="../manifest.json">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="manifest" href="/manifest.json">
     <script>
         // Register service worker for PWA functionality
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
-                navigator.serviceWorker.register('../sw.js')
+                navigator.serviceWorker.register('/sw.js')
                     .then(function(registration) {
                         console.log('ServiceWorker registration successful');
                     })
@@ -149,7 +149,7 @@ $completed_orders = $stmt->fetchColumn() ?: 0;
                 <a href="management.php">Management</a>
                 <a href="store_data.php">Store Data</a>
                 <a href="bank_approvals.php">Bank Approvals</a>
-                <a href="../logout.php" class="logout-btn">Logout</a>
+                <a href="/logout.php" class="logout-btn">Logout</a>
             </div>
         </div>
         
