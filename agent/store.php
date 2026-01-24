@@ -7,6 +7,9 @@ if (hasRole('admin')) {
     exit();
 }
 
+// Ensure config is loaded and getConnection function is available
+require_once '../config.php';
+
 $pdo = getConnection();
 $agent_id = $_SESSION['user_id'];
 

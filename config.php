@@ -1,9 +1,10 @@
 <?php
 // Database configuration
-define('DB_HOST', 'localhost');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-define('DB_NAME', 'collection_tracking');
+// Use environment variables or default values for web hosting
+define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
+define('DB_USER', getenv('DB_USER') ?: (getenv('MYSQL_USER') ?: 'root'));
+define('DB_PASS', getenv('DB_PASS') ?: (getenv('MYSQL_PASSWORD') ?: ''));
+define('DB_NAME', getenv('DB_NAME') ?: 'collection_tracking');
 
 // Connection to database
 function getConnection() {

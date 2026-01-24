@@ -41,8 +41,25 @@ function login($username, $password) {
 
 // Logout function
 function logout() {
+    session_start(); // Start session to ensure we can destroy it
+
+    // Clear all session data
+    $_SESSION = array();
+
+    // Delete the session cookie if it exists
+    if (isset($_COOKIE[session_name()])) {
+        setcookie(session_name(), '', time()-3600, '/');
+    }
+
+    // Destroy the session
     session_destroy();
-    header("Location: ../login.php");
+
+    // Redirect to login page - adjust path for web hosting compatibility
+    $basePath = dirname($_SERVER['SCRIPT_NAME']);
+    if ($basePath === '/') {
+        $basePath = '';
+    }
+    header("Location: {$basePath}/login.php");
     exit();
 }
 

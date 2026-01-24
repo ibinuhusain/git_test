@@ -27,6 +27,7 @@ A Progressive Web Application (PWA) for tracking daily collections by agents for
 
 ## Installation
 
+### Local Development (XAMPP)
 1. Make sure you have XAMPP installed with PHP and MySQL
 2. Place this project in your XAMPP `htdocs` directory
 3. Start Apache and MySQL through XAMPP Control Panel
@@ -35,10 +36,14 @@ A Progressive Web Application (PWA) for tracking daily collections by agents for
    - Username: `admin`
    - Password: `admin123`
 
+### Web Hosting (Hostinger)
+See `HOSTINGER_SETUP.md` for detailed deployment instructions.
+
 ## Default Credentials
 
+- **Super Admin**: username: `apprelsadmin`, password: `x9n6X8o1u41TSRU95`
 - **Admin**: username: `admin`, password: `admin123`
-- **Agents**: Created through admin panel with custom credentials
+- **Agent**: username: `agent1`, password: `agent123`
 
 ## Security Notes
 
@@ -47,8 +52,16 @@ A Progressive Web Application (PWA) for tracking daily collections by agents for
 - Input validation is implemented throughout the application
 - File uploads are restricted to safe formats (images and PDFs)
 
+## Troubleshooting
+
+For common issues and solutions, refer to `TROUBLESHOOTING.md`.
+
 ## Customization
 
 - Modify `config.php` to update database settings if needed
 - Adjust styling in `css/style.css`
 - Add additional security measures as needed for production deployment
+
+## Support
+
+For technical support on web hosting platforms, contact your hosting provider with specific error messages from the error logs.

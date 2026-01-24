@@ -2,6 +2,9 @@
 require_once '../includes/auth.php';
 requireAdmin();
 
+// Ensure config is loaded and getConnection function is available
+require_once '../config.php';
+
 $pdo = getConnection();
 
 // Handle form submission for assigning shops to agents
@@ -27,139 +30,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['import_excel'])) {
         // Check if it's a valid Excel file
         $valid_types = ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'text/csv'];
         if (in_array($file_type, $valid_types)) {
-            // First, try to use PhpOffice\PhpSpreadsheet if available
-            $importedCount = 0;
-            $hasPhpSpreadsheet = class_exists('\\PhpOffice\\PhpSpreadsheet\\IOFactory');
-            
-            if ($hasPhpSpreadsheet) {
-                try {
-                    // Load the spreadsheet file using PhpSpreadsheet
-                    $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($file_tmp);
-                    $worksheet = $spreadsheet->getActiveSheet();
-                    $rows = $worksheet->toArray();
-                    
-                    // Skip header row
-                    array_shift($rows);
-                    
-                    foreach ($rows as $row) {
-                        if (!empty($row[0]) && !empty($row[1])) { // Agent_Name and Region are required
-                            $agent_name = trim($row[0]);
-                            $region = trim($row[1]);
-                            $mall = trim($row[2] ?? '');
-                            $entity = trim($row[3] ?? '');
-                            $brand = trim($row[4] ?? '');
+            // Use basic CSV processing only to avoid dependency issues on web hosts
+            if (($handle = fopen($file_tmp, "r")) !== FALSE) {
+                // Skip header row
+                fgetcsv($handle);
+                
+                $added_count = 0;
+                while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+                    if (count($data) >= 5) {
+                        $agent_name = trim($data[0]);
+                        $region = trim($data[1]);
+                        $mall = trim($data[2]);
+                        $entity = trim($data[3]);
+                        $brand = trim($data[4]);
+                        
+                        // Find agent by name
+                        $agent_stmt = $pdo->prepare("SELECT id FROM users WHERE name = ? AND role = 'agent'");
+                        $agent_stmt->execute([$agent_name]);
+                        $agent = $agent_stmt->fetch();
+                        
+                        if ($agent) {
+                            $agent_id = $agent['id'];
                             
-                            // Find agent by name
-                            $agentStmt = $pdo->prepare("SELECT id FROM users WHERE name = ? AND role = 'agent'");
-                            $agentStmt->execute([$agent_name]);
-                            $agent = $agentStmt->fetch(PDO::FETCH_ASSOC);
+                            // Find store by entity/mall details
+                            $store_stmt = $pdo->prepare("SELECT id FROM stores WHERE entity = ? AND mall = ?");
+                            $store_stmt->execute([$entity, $mall]);
+                            $store = $store_stmt->fetch();
                             
-                            if ($agent) {
-                                // Find region by name
-                                $regionStmt = $pdo->prepare("SELECT id FROM regions WHERE name = ?");
-                                $regionStmt->execute([$region]);
-                                $regionResult = $regionStmt->fetch(PDO::FETCH_ASSOC);
+                            if ($store) {
+                                $store_id = $store['id'];
                                 
-                                if ($regionResult) {
-                                    $region_id = $regionResult['id'];
-                                    
-                                    // Find stores matching the criteria
-                                    $storeStmt = $pdo->prepare("SELECT id FROM stores WHERE region_id = ? AND mall LIKE ? AND entity LIKE ?");
-                                    $storeStmt->execute([$region_id, "%$mall%", "%$entity%"]);
-                                    $stores = $storeStmt->fetchAll(PDO::FETCH_ASSOC);
-                                    
-                                    foreach ($stores as $store) {
-                                        // Create assignment
-                                        $assignmentStmt = $pdo->prepare("INSERT INTO daily_assignments (agent_id, store_id, date_assigned, status) VALUES (?, ?, ?, 'pending')");
-                                        $assignmentStmt->execute([$agent['id'], $store['id'], date('Y-m-d')]);
-                                    }
-                                    
-                                    $importedCount++;
-                                } else {
-                                    // If region doesn't exist, create it
-                                    $createRegionStmt = $pdo->prepare("INSERT INTO regions (name) VALUES (?)");
-                                    $createRegionStmt->execute([$region]);
-                                    $region_id = $pdo->lastInsertId();
-                                    
-                                    // Find stores matching the criteria
-                                    $storeStmt = $pdo->prepare("SELECT id FROM stores WHERE region_id = ? AND mall LIKE ? AND entity LIKE ?");
-                                    $storeStmt->execute([$region_id, "%$mall%", "%$entity%"]);
-                                    $stores = $storeStmt->fetchAll(PDO::FETCH_ASSOC);
-                                    
-                                    foreach ($stores as $store) {
-                                        // Create assignment
-                                        $assignmentStmt = $pdo->prepare("INSERT INTO daily_assignments (agent_id, store_id, date_assigned, status) VALUES (?, ?, ?, 'pending')");
-                                        $assignmentStmt->execute([$agent['id'], $store['id'], date('Y-m-d')]);
-                                    }
-                                    
-                                    $importedCount++;
-                                }
-                            } else {
-                                $error_message = "Agent '$agent_name' does not exist.";
-                                break;
+                                // Create assignment
+                                $assignment_stmt = $pdo->prepare("INSERT INTO daily_assignments (agent_id, store_id, date_assigned) VALUES (?, ?, ?)");
+                                $assignment_stmt->execute([$agent_id, $store_id, date('Y-m-d')]);
+                                $added_count++;
                             }
                         }
                     }
-                    
-                    if (!$error_message) {
-                        $success_message = "Successfully imported $importedCount assignments from Excel file.";
-                    }
-                } catch (Exception $e) {
-                    // If PhpSpreadsheet fails, fall back to basic CSV processing
-                    $error_message = "";
-                    $hasPhpSpreadsheet = false;
                 }
-            }
-            
-            // If PhpSpreadsheet is not available or failed, use basic CSV processing
-            if (!$hasPhpSpreadsheet && !$error_message) {
-                if (($handle = fopen($file_tmp, "r")) !== FALSE) {
-                    // Skip header row
-                    fgetcsv($handle);
-                    
-                    $added_count = 0;
-                    while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
-                        if (count($data) >= 5) {
-                            $agent_name = trim($data[0]);
-                            $region = trim($data[1]);
-                            $mall = trim($data[2]);
-                            $entity = trim($data[3]);
-                            $brand = trim($data[4]);
-                            
-                            // Find agent by name
-                            $agent_stmt = $pdo->prepare("SELECT id FROM users WHERE name = ? AND role = 'agent'");
-                            $agent_stmt->execute([$agent_name]);
-                            $agent = $agent_stmt->fetch();
-                            
-                            if ($agent) {
-                                $agent_id = $agent['id'];
-                                
-                                // Find store by entity/mall details
-                                $store_stmt = $pdo->prepare("SELECT id FROM stores WHERE entity = ? AND mall = ?");
-                                $store_stmt->execute([$entity, $mall]);
-                                $store = $store_stmt->fetch();
-                                
-                                if ($store) {
-                                    $store_id = $store['id'];
-                                    
-                                    // Create assignment
-                                    $assignment_stmt = $pdo->prepare("INSERT INTO daily_assignments (agent_id, store_id, date_assigned) VALUES (?, ?, ?)");
-                                    $assignment_stmt->execute([$agent_id, $store_id, date('Y-m-d')]);
-                                    $added_count++;
-                                }
-                            }
-                        }
-                    }
-                    fclose($handle);
-                    
-                    if ($added_count > 0) {
-                        $success_message = "Successfully imported $added_count assignments!";
-                    } else {
-                        $error_message = "No assignments were imported. Check your file format.";
-                    }
+                fclose($handle);
+                
+                if ($added_count > 0) {
+                    $success_message = "Successfully imported $added_count assignments!";
                 } else {
-                    $error_message = "Could not read the uploaded file.";
+                    $error_message = "No assignments were imported. Check your file format.";
                 }
+            } else {
+                $error_message = "Could not read the uploaded file.";
             }
         } else {
             $error_message = "Invalid file type. Please upload a CSV or Excel file.";

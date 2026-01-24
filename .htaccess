@@ -1,0 +1,16 @@
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [QSA,L]
+
+# PHP settings for better compatibility
+php_flag display_errors on
+php_value error_reporting 2147483647
+php_value log_errors on
+php_value error_log /workspace/php_error.log
+
+# Increase memory limit for larger operations
+php_value memory_limit 256M
+
+# Allow longer execution times
+php_value max_execution_time 300

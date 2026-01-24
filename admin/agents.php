@@ -2,6 +2,9 @@
 require_once '../includes/auth.php';
 requireAdmin();
 
+// Ensure config is loaded and getConnection function is available
+require_once '../config.php';
+
 $pdo = getConnection();
 
 // Handle Excel import
@@ -13,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['import_agents'])) {
         // Check if it's a valid Excel file
         $valid_types = ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'text/csv'];
         if (in_array($file_type, $valid_types)) {
-            // Process Excel file - for now we'll use a simple CSV approach
+            // Process Excel file - simplified to use basic CSV handling to avoid dependency issues
             if (($handle = fopen($file_tmp, "r")) !== FALSE) {
                 // Skip header row
                 fgetcsv($handle);
@@ -36,8 +39,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['import_agents'])) {
                             $check_stmt->execute([$username]);
                             
                             if (!$check_stmt->fetch()) {
-                                $stmt = $pdo->prepare("INSERT INTO users (id, name, username, phone, password, role) VALUES (?, ?, ?, ?, ?, 'agent')");
-                                $stmt->execute([$userid, $agent_name, $username, $phone, $hashed_password]);
+                                // Only insert if userid is provided, otherwise let it auto-increment
+                                if (!empty($userid) && is_numeric($userid)) {
+                                    $stmt = $pdo->prepare("INSERT INTO users (id, name, username, phone, password, role) VALUES (?, ?, ?, ?, ?, 'agent')");
+                                    $stmt->execute([$userid, $agent_name, $username, $phone, $hashed_password]);
+                                } else {
+                                    $stmt = $pdo->prepare("INSERT INTO users (name, username, phone, password, role) VALUES (?, ?, ?, ?, 'agent')");
+                                    $stmt->execute([$agent_name, $username, $phone, $hashed_password]);
+                                }
                                 $added_count++;
                             }
                         }
