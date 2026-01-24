@@ -1,5 +1,11 @@
 # Setting Up Your Apparels Collection System on Hostinger
 
+## Prerequisites
+
+- A Hostinger account with hosting plan
+- FTP client (like FileZilla) or Hostinger's file manager
+- Database access through Hostinger's control panel (hPanel)
+
 ## Database Configuration
 
 On Hostinger, you need to update your database settings. The application now supports environment variables for database configuration:
@@ -28,6 +34,16 @@ On Hostinger, you need to update your database settings. The application now sup
 2. Make sure the following directories have write permissions:
    - `/uploads/` (for file uploads)
    - Root directory (for session files)
+3. Ensure the `.htaccess` file is included in your upload (it handles URL rewriting)
+
+## Troubleshooting Page Loading Issues
+
+If pages are not loading (showing "This site can't be reached" errors):
+
+1. **Check .htaccess file**: We've included a .htaccess file to handle URL rewriting on Apache servers
+2. **Verify file permissions**: Make sure PHP files have 644 permissions and directories have 755
+3. **Test database connection**: Run `info.php` to check if database connection works
+4. **Enable error reporting**: Temporarily enable error display to see specific issues
 
 ## Import/Export Functionality
 
@@ -56,6 +72,8 @@ Fixed loading issues:
 1. **File Permissions**: Make sure PHP files have proper permissions (usually 644)
 2. **Session Path**: If sessions aren't working, contact your host to verify session directory permissions
 3. **Memory Limits**: Some imports might fail due to memory limits; keep CSV files reasonably sized
+4. **URL Rewriting**: Apache mod_rewrite needs to be enabled (standard on most hosts)
+5. **Database Connection**: Web hosting databases often require specific hostnames (like localhost:3306 or a custom hostname)
 
 ## Testing After Setup
 
@@ -67,6 +85,18 @@ Fixed loading issues:
 3. Test the logout functionality
 4. Verify the bank approval page loads
 5. Test import/export features with small CSV files first
+6. Run `info.php` to check server configuration
+
+## Debugging with info.php
+
+We've included an `info.php` file to help troubleshoot server issues:
+
+1. Access `http://yourdomain.com/info.php` to check:
+   - PHP version and configuration
+   - Database connectivity
+   - File permissions
+   - Server environment
+2. Remove this file after setup for security
 
 ## Sample CSV Format
 
