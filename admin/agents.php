@@ -2,6 +2,9 @@
 require_once '../includes/auth.php';
 requireAdmin();
 
+// Ensure config is loaded and getConnection function is available
+require_once '../config.php';
+
 $pdo = getConnection();
 
 // Handle Excel import

@@ -74,6 +74,7 @@ Fixed loading issues:
 3. **Memory Limits**: Some imports might fail due to memory limits; keep CSV files reasonably sized
 4. **URL Rewriting**: Apache mod_rewrite needs to be enabled (standard on most hosts)
 5. **Database Connection**: Web hosting databases often require specific hostnames (like localhost:3306 or a custom hostname)
+6. **Function Not Found Errors**: If you encounter errors like "Call to undefined function getConnection()", ensure that `config.php` is properly included in all files that use database functions
 
 ## Testing After Setup
 
